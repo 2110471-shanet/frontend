@@ -26,4 +26,6 @@
 
 - Socket.IO Client 4.8: for handling chat logics
 
-- Axios 1.8: for handling HTTP/HTTPS requests/responses
+- Axios 1.8: for handling HTTP/HTTPS requests/responses (`import axios from "@/axios"`)
+
+    - `.env` is needed with `NEXT_PUBLIC_SERVER_URL` with the value of your choice (e.g. `http://localhost:5000/`)
