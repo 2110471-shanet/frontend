@@ -1,0 +1,82 @@
+"use client"
+
+import { KeyboardEvent, SyntheticEvent, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useUsername } from "@/components/provider/UsernameProvider";
+import { useGlobalLoading } from "@/components/provider/GlobalLoadingProvider";
+
+import CreateOutlinedIcon from '@mui/icons-material/CreateOutlined';
+
+import { League_Spartan } from "next/font/google";
+import Image from "next/image";
+
+const league_spartan = League_Spartan({
+    subsets: ["latin"],
+    weight: ["600", "700", "800", "900"],
+});
+
+
+export default function NavBar({
+    setIsChatSelectionShown
+}: {
+    setIsChatSelectionShown: Function
+}) {
+
+    const { username, setUsername } = useUsername();
+    const { isLoading, setIsLoading } = useGlobalLoading();
+    const [isSettingUsername, setIsSettingUsername] = useState(false);
+
+    const [inputValue, setInputValue] = useState("");
+
+    const router = useRouter();
+
+    async function handleSettingUsername(e: KeyboardEvent<HTMLInputElement>) {
+        e.stopPropagation();
+        if (e.key === "Escape") {
+            setInputValue("");
+            setIsSettingUsername(false);
+        } else if (e.key === "Enter") {
+            setIsLoading(true);
+            await new Promise((resolve) => {
+                setTimeout(resolve, 500);
+            });
+            setUsername(inputValue);
+            setInputValue("");
+            setIsLoading(false);
+            setIsSettingUsername(false);
+        }
+    }
+
+    async function handleSignOut(e: SyntheticEvent<HTMLButtonElement>) {
+        e.preventDefault();
+        e.stopPropagation();
+        setIsLoading(true);
+        await new Promise((resolve) => {
+            setTimeout(resolve, 1000);
+        });
+        router.push("/signin");
+        setIsLoading(false);
+    }
+
+    return (
+        <nav className="z-30 w-full flex justify-between items-center bg-white border-b-1 border-slate-300 py-2">
+            <h1 className={`${league_spartan.className} text-xl font-bold ps-8`}>SHANET</h1>
+            <div className="flex justify-center items-center me-8">
+                <div className={`h-5 w-5 relative me-4 hover:cursor-pointer ${(isSettingUsername) ? "hidden": ""}`} onClick={async (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setIsSettingUsername(true);
+                }}>
+                    <CreateOutlinedIcon sx={{width: "100%", height: "100%", objectFit: "contain"    }} />
+                </div>
+                <span className={`me-6 px-4 py-2 bg-blue-200 rounded-md ${(isSettingUsername) ? "hidden": ""}`}>{username}</span>
+                <input className={`px-4 py-2 outline-1 rounded-md me-4 ${(isSettingUsername) ? "": "hidden"}`} type="text" value={inputValue} placeholder={username} onChange={(e) => {
+                    if (!e.target.value.includes(" ")) {
+                        setInputValue(e.target.value);
+                    }
+                }} onKeyDown={handleSettingUsername} />
+                <button className="hover:cursor-pointer" onClick={handleSignOut}>Sign Out</button>
+            </div>
+        </nav>
+    );
+}
