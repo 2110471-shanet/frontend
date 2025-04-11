@@ -1,6 +1,7 @@
 "use client"
 
 import { createContext, useMemo, useState, useContext, useEffect } from "react";
+import { usePathname } from "next/navigation";
 import { useGlobalLoading } from "./GlobalLoadingProvider";
 
 type UsernameContextType = {
@@ -29,13 +30,19 @@ export default function UsernameProvider({
 
     const contextValue = useMemo(() => ({ username, setUsername }), [username]);
 
+    const pathname = usePathname();
+
     useEffect(() => {
+        const skipPaths = ["/signin", "/signup"];
+        if (skipPaths.includes(pathname)) {
+            return;
+        }
         async function testLoadUsername() {
             setIsLoading(true);
             await new Promise((resolve) => {
                 setTimeout(resolve, 3000);
             });
-            setUsername("Jojo");
+            setUsername("MarikoAnasta");
             setIsLoading(false);
         };
         testLoadUsername();
