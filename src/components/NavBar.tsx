@@ -6,6 +6,7 @@ import { useUsername } from "@/components/provider/UsernameProvider";
 import { useGlobalLoading } from "@/components/provider/GlobalLoadingProvider";
 
 import CreateOutlinedIcon from '@mui/icons-material/CreateOutlined';
+import MenuRoundedIcon from '@mui/icons-material/MenuRounded';
 
 import { League_Spartan } from "next/font/google";
 import Image from "next/image";
@@ -17,16 +18,18 @@ const league_spartan = League_Spartan({
 
 
 export default function NavBar({
-    setIsChatSelectionShown
+    isChatSelectionShown,
+    setIsChatSelectionShown,
 }: {
-    setIsChatSelectionShown: Function
+    isChatSelectionShown: boolean,
+    setIsChatSelectionShown: Function,
 }) {
 
     const { username, setUsername } = useUsername();
     const { isLoading, setIsLoading } = useGlobalLoading();
-    const [isSettingUsername, setIsSettingUsername] = useState(false);
+    const [ isSettingUsername, setIsSettingUsername ] = useState(false);
 
-    const [inputValue, setInputValue] = useState("");
+    const [ inputValue, setInputValue ] = useState("");
 
     const router = useRouter();
 
@@ -60,17 +63,22 @@ export default function NavBar({
 
     return (
         <nav className="z-30 w-full flex justify-between items-center bg-white border-b-1 border-slate-300 py-2">
-            <h1 className={`${league_spartan.className} text-xl font-bold ps-8`}>SHANET</h1>
-            <div className="flex justify-center items-center me-8">
+            <div className="h-6 w-6 ms-6 hover:cursor-pointer lg:hidden" onClick={(e) => {
+                setIsChatSelectionShown(!isChatSelectionShown);
+            }}>
+                <MenuRoundedIcon sx={{height: "100%", width: "100%"}} />
+            </div>
+            <h1 className={`${league_spartan.className} text-xl font-bold me-6 lg:me-0 lg:ms-8`}>SHANET</h1>
+            <div className="justify-center items-center me-6 lg:me-8 hidden lg:flex">
                 <div className={`h-5 w-5 relative me-4 hover:cursor-pointer ${(isSettingUsername) ? "hidden": ""}`} onClick={async (e) => {
                     e.preventDefault();
                     e.stopPropagation();
                     setIsSettingUsername(true);
                 }}>
-                    <CreateOutlinedIcon sx={{width: "100%", height: "100%", objectFit: "contain"    }} />
+                    <CreateOutlinedIcon sx={{width: "100%", height: "100%", objectFit: "contain"}} />
                 </div>
                 <span className={`me-6 px-4 py-2 bg-blue-200 rounded-md ${(isSettingUsername) ? "hidden": ""}`}>{username}</span>
-                <input className={`px-4 py-2 outline-1 rounded-md me-4 ${(isSettingUsername) ? "": "hidden"}`} type="text" value={inputValue} placeholder={username} onChange={(e) => {
+                <input className={`px-4 py-2 outline-1 rounded-md me-4 hidden ${(isSettingUsername) ? "": "hidden"}`} type="text" value={inputValue} placeholder={username} onChange={(e) => {
                     if (!e.target.value.includes(" ")) {
                         setInputValue(e.target.value);
                     }
