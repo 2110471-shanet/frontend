@@ -8,6 +8,8 @@ import { useGlobalLoading } from "@/components/provider/GlobalLoadingProvider";
 import CreateOutlinedIcon from '@mui/icons-material/CreateOutlined';
 import MenuRoundedIcon from '@mui/icons-material/MenuRounded';
 
+import Link from "next/link";
+
 import { League_Spartan } from "next/font/google";
 import Image from "next/image";
 
@@ -39,14 +41,19 @@ export default function NavBar({
             setInputValue("");
             setIsSettingUsername(false);
         } else if (e.key === "Enter") {
-            setIsLoading(true);
-            await new Promise((resolve) => {
-                setTimeout(resolve, 500);
-            });
-            setUsername(inputValue);
-            setInputValue("");
-            setIsLoading(false);
-            setIsSettingUsername(false);
+            if (inputValue === "") {
+                setIsSettingUsername(false);
+                setInputValue("");
+            } else {
+                setIsLoading(true);
+                await new Promise((resolve) => {
+                    setTimeout(resolve, 500);
+                });
+                setUsername(inputValue);
+                setInputValue("");
+                setIsLoading(false);
+                setIsSettingUsername(false);
+            }
         }
     }
 
@@ -57,7 +64,7 @@ export default function NavBar({
         await new Promise((resolve) => {
             setTimeout(resolve, 1000);
         });
-        router.push("/signin");
+        await router.push("/signin");
         setIsLoading(false);
     }
 
@@ -68,7 +75,7 @@ export default function NavBar({
             }}>
                 <MenuRoundedIcon sx={{height: "100%", width: "100%"}} />
             </div>
-            <h1 className={`${league_spartan.className} text-xl font-bold me-6 lg:me-0 lg:ms-8`}>SHANET</h1>
+            <Link href="/" className={`${league_spartan.className} text-xl font-bold me-6 lg:me-0 lg:ms-8`}>SHANET</Link>
             <div className="justify-center items-center me-6 lg:me-8 hidden lg:flex">
                 <div className={`h-5 w-5 relative me-4 hover:cursor-pointer ${(isSettingUsername) ? "hidden": ""}`} onClick={async (e) => {
                     e.preventDefault();
@@ -83,7 +90,7 @@ export default function NavBar({
                         setInputValue(e.target.value);
                     }
                 }} onKeyDown={handleSettingUsername} />
-                <button className="hover:cursor-pointer" onClick={handleSignOut}>Sign Out</button>
+                <button className="hover:cursor-pointer hover:underline" onClick={handleSignOut}>Sign Out</button>
             </div>
         </nav>
     );
