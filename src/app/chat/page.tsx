@@ -16,10 +16,10 @@ export default function Chat() {
                 <ChatSelect isChatSelectionShown={isChatSelectionShown} />
                 <ChatBox />
             </main>
-            <div className={`absolute w-full h-screen top-0 left-0 bg-black duration-150 lg:duration-0 z-20 lg:hidden ${(isChatSelectionShown) ? "opacity-10": "opacity-0 select-none"}`} onClick={(e) => {
+            <div className={`absolute w-full h-screen top-0 left-0 bg-black duration-150 lg:duration-0 z-20 lg:hidden ${(isChatSelectionShown) ? "opacity-10": "opacity-0 select-none hidden"}`} onClick={(e) => {
                 setIsChatSelectionShown(false);
             }}>
-
+                
             </div>
         </div>
     );
