@@ -1,4 +1,4 @@
-"use effect"
+"use client"
 
 import { useGlobalLoading } from "@/components/provider/GlobalLoadingProvider";
 
