@@ -77,8 +77,8 @@ export default function NavBar({
                 }}>
                     <CreateOutlinedIcon sx={{width: "100%", height: "100%", objectFit: "contain"}} />
                 </div>
-                <span className={`me-6 px-4 py-2 bg-blue-200 rounded-md ${(isSettingUsername) ? "hidden": ""}`}>{username}</span>
-                <input className={`px-4 py-2 outline-1 rounded-md me-4 hidden ${(isSettingUsername) ? "": "hidden"}`} type="text" value={inputValue} placeholder={username} onChange={(e) => {
+                <span className={`me-6 px-4 py-2 bg-blue-100 outline-1 rounded-md ${(isSettingUsername) ? "hidden": ""}`}>{username}</span>
+                <input className={`px-4 py-2 outline-1 rounded-md me-4 hidden ${(isSettingUsername) ? "lg:block": "hidden"}`} type="text" value={inputValue} placeholder={username} onChange={(e) => {
                     if (!e.target.value.includes(" ")) {
                         setInputValue(e.target.value);
                     }
