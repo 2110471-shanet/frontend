@@ -3,6 +3,7 @@ import { Geist, Geist_Mono, Noto_Sans_Thai } from "next/font/google";
 import "./globals.css";
 import GlobalLoadingProvider from "@/components/provider/GlobalLoadingProvider";
 import UsernameProvider from "@/components/provider/UsernameProvider";
+import GroupMemberContextProvider from "@/components/provider/GroupMemberProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -33,7 +34,9 @@ export default function RootLayout({
       >
         <GlobalLoadingProvider>
           <UsernameProvider>
-            {children}
+            <GroupMemberContextProvider>
+              {children}
+            </GroupMemberContextProvider>
           </UsernameProvider>
         </GlobalLoadingProvider>
       </body>

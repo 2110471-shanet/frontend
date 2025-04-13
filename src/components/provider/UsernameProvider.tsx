@@ -11,7 +11,7 @@ type UsernameContextType = {
 
 const UsernameContext = createContext<UsernameContextType | undefined>(undefined);
 
-export const useUsername = () => {
+export function useUsername() {
     const context = useContext(UsernameContext);
     if (!context) {
         throw new Error("useUsername must be used within a UsernameProvider");
@@ -20,13 +20,13 @@ export const useUsername = () => {
 };
 
 export default function UsernameProvider({
-    children
+    children,
 }: {
-    children: React.ReactNode
+    children: React.ReactNode,
 }) {
     
     const {isLoading, setIsLoading} = useGlobalLoading();
-    const [username, setUsername] = useState("");
+    const [username, setUsername] = useState("loading");
 
     const contextValue = useMemo(() => ({ username, setUsername }), [username]);
 
@@ -40,9 +40,9 @@ export default function UsernameProvider({
         async function testLoadUsername() {
             setIsLoading(true);
             await new Promise((resolve) => {
-                setTimeout(resolve, 3000);
+                setTimeout(resolve, 1000);
             });
-            setUsername("MarikoAnasta");
+            setUsername("LindaLunda");
             setIsLoading(false);
         };
         testLoadUsername();
