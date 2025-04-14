@@ -30,7 +30,7 @@ export default function UsernameProvider({
     const pathname = usePathname();
 
     useEffect(() => {
-        const skipPaths = ["/signin", "/signup"];
+        const skipPaths = ["/signin", "/signup", "/test-ui"];
         if (skipPaths.includes(pathname)) {
             return;
         }

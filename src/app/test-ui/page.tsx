@@ -1,6 +1,13 @@
+"use client"
+
 import SearchRoundedIcon from '@mui/icons-material/SearchRounded';
 
+import { useState } from 'react';
+
 export default function TestUI() {
+
+    const [testMessage, setTestMessage] = useState("");
+
     return (
         <div className="flex flex-col gap-8 min-h-screen justify-center items-center bg-slate-50">
             <label className="relative w-60">
@@ -9,9 +16,12 @@ export default function TestUI() {
                     <SearchRoundedIcon sx={{width: "80%", height: "80%"}} />
                 </div>
             </label>
-            <div className="w-48 h-48 bg-orange-200 rounded-md outline outline-slate-300 drop-shadown-sm duration-200 hover:drop-shadown-lg hover:-translate-2 hover:bg-blue-200 hover:outline-slate-500">
+            <div className="w-48 h-48 bg-orange-200 rounded-md outline outline-slate-300 drop-shadown-sm duration-200 hover:drop-shadown-lg hover:-translate-2 hover:bg-blue-200 hover:outline-slate-500" onMouseEnter={(e) => {
+                setTestMessage(testMessage + "\nha!")
+            }}>
 
             </div>
+            <h1 className="whitespace-pre-wrap">{testMessage}</h1>
         </div>
     );
 }
