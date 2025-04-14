@@ -5,6 +5,8 @@ import ChatSelect from "@/components/chatpage/ChatSelect";
 import NavBar from "@/components/NavBar";
 import { useState, useEffect, createContext, SetStateAction, useMemo, useContext } from "react";
 
+// ==================== context ====================
+
 type ChatSelectionStateContextType = {
     chatSelectionState: string;
     setChatSelectionState: React.Dispatch<SetStateAction<string>>;
@@ -20,6 +22,8 @@ export function useChatSelectionState() {
 
 const ChatSelectionStateContext = createContext<ChatSelectionStateContextType | undefined>(undefined);
 
+// ==================== component ====================
+
 export default function Chat() {
 
     const [isChatSelectionShown, setIsChatSelectionShown] = useState(false);
@@ -27,7 +31,7 @@ export default function Chat() {
     // empty, loading, ready
     const [chatSelectionState, setChatSelectionState] = useState("empty");
 
-    const chatSelectionStateContextValue = useMemo(() => ({chatSelectionState, setChatSelectionState}), [chatSelectionState])
+    const chatSelectionStateContextValue = useMemo(() => ({chatSelectionState, setChatSelectionState}), [chatSelectionState]);
 
     return (
         <div className="h-screen flex flex-col flex-nowrap w-full relative">
