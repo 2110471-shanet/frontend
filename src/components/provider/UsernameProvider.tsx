@@ -4,10 +4,7 @@ import { createContext, useMemo, useState, useContext, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { useGlobalLoading } from "./GlobalLoadingProvider";
 
-type UsernameContextType = {
-    username: string;
-    setUsername: React.Dispatch<React.SetStateAction<string>>;
-};
+import type { UsernameContextType } from "@/types";
 
 const UsernameContext = createContext<UsernameContextType | undefined>(undefined);
 

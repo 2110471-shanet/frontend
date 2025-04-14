@@ -3,10 +3,7 @@
 import { CircularProgress } from "@mui/material";
 import { createContext, useMemo, useState, useContext } from "react";
 
-type GlobalLoadingContextType = {
-    isLoading: boolean;
-    setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
-};
+import type { GlobalLoadingContextType } from "@/types";
 
 const GlobalLoadingContext = createContext<GlobalLoadingContextType | undefined>(undefined);
 
