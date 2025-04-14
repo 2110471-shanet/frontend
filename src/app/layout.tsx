@@ -15,7 +15,9 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-const noto_sans_thai = Noto_Sans_Thai();
+const noto_sans_thai = Noto_Sans_Thai({
+  subsets: ["thai"]
+});
 
 export const metadata: Metadata = {
   title: "Shanet",

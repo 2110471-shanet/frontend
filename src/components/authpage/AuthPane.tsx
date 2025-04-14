@@ -7,6 +7,7 @@ import Link from "next/link";
 import Image from "next/image";
 
 import { League_Spartan } from "next/font/google";
+import { CircularProgress } from "@mui/material";
 
 const league_spartan = League_Spartan({
     subsets: ["latin"],
@@ -27,6 +28,9 @@ export default function SignUpPane({
     const [errorMessage, setErrorMessage] = useState("");
 
     const [isPasswordShown, setIsPasswordShown] = useState(false);
+
+    const [isLocalLoading, setIsLocalLoading] = useState(false);
+
     const showIconUrl = (isPasswordShown) ? "/icons/visibility_on_black.png" : "/icons/visibility_off_black.png";
     const inputPasswordType = (isPasswordShown) ? "text" : "password";
 
@@ -34,7 +38,7 @@ export default function SignUpPane({
     const pageLabel = (isSignUp) ? "Registration": "Sign In";
     const buttonLabel = (isSignUp) ? "Sign Up": "Sign In";
 
-    function handleSignUpButton(e: SyntheticEvent<HTMLButtonElement>) {
+    async function handleSignUpButton(e: SyntheticEvent<HTMLButtonElement>) {
         e.stopPropagation();
         e.preventDefault();
         if (username.length <= 0) {
@@ -44,11 +48,18 @@ export default function SignUpPane({
         } else if (username.includes(" ")) {
             setErrorMessage("username cannot contain any space.");
             // password containing empty will be checked by back end
+        } else {
+            setIsLocalLoading(true);
+            await new Promise((resolve) => {
+                setTimeout(resolve, 1000);
+            });
+            setErrorMessage("this username is already used.");
+            setIsLocalLoading(false);
         }
         // try
     }
 
-    function handleSignInButton(e: SyntheticEvent<HTMLButtonElement>) {
+    async function handleSignInButton(e: SyntheticEvent<HTMLButtonElement>) {
         e.stopPropagation();
         e.preventDefault();
         if (username.length <= 0) {
@@ -58,6 +69,13 @@ export default function SignUpPane({
         } else if (username.includes(" ")) {
             setErrorMessage("username cannot contain any space.");
             // password containing empty will be checked by back end
+        } else {
+            setIsLocalLoading(true);
+            await new Promise((resolve) => {
+                setTimeout(resolve, 1000);
+            });
+            setErrorMessage("invalid username or password");
+            setIsLocalLoading(false);
         }
     }
 
@@ -74,37 +92,45 @@ export default function SignUpPane({
             <Link className="text-sm text-[#1A4789] hover:underline" href="signup">Don't have an account?</Link>
         </>
     )
+    if (!isLocalLoading) {
 
-    return (
-        <div className="h-[28rem] w-[32rem] bg-white rounded-md drop-shadow-md pt-16 relative px-6 md:px-10 lg:px-12">
-            <h1 className={`${league_spartan.className} font-bold text-5xl text-slate-900 text-center`}>SHANET</h1>
-            <h2 className="text-lg text-center">{pageLabel}</h2>
-            <form className="flex flex-col w-full mt-4">
-                <input className="px-3 py-1 outline-2 outline-slate-100 rounded-md hover:bg-slate-50 focus:bg-slate-50 focus:outline-slate-200" value={username} type="text" placeholder="username" onChange={(e) => {
-                    if (!e.target.value.includes(" ")) {
-                        setUsername(e.target.value);
-                        setErrorMessage("");
-                    } 
-                }} />
-                <label className="relative mt-6">
-                    <input className="ps-3 pe-12 py-1 outline-2 outline-slate-100 rounded-md hover:bg-slate-50 focus:bg-slate-50 focus:outline-slate-200 w-full" value={password} type={inputPasswordType} placeholder="password" onChange={(e) => {
+        return (
+            <div className="h-[28rem] w-[32rem] bg-white rounded-md drop-shadow-md pt-16 relative px-6 md:px-10 lg:px-12">
+                <h1 className={`${league_spartan.className} font-bold text-5xl text-slate-900 text-center`}>SHANET</h1>
+                <h2 className="text-lg text-center">{pageLabel}</h2>
+                <form className="flex flex-col w-full mt-4">
+                    <input className="px-3 py-1 outline-2 outline-slate-100 rounded-md hover:bg-slate-50 focus:bg-slate-50 focus:outline-slate-200" value={username} type="text" placeholder="username" onChange={(e) => {
                         if (!e.target.value.includes(" ")) {
-                            setPassword(e.target.value);
+                            setUsername(e.target.value);
                             setErrorMessage("");
-                        }
+                        } 
                     }} />
-                    <div className="absolute right-4 top-1/2 -translate-y-[50%] h-6 w-6 hover:cursor-pointer" onClick={(e) => {
-                        setIsPasswordShown(!isPasswordShown);
-                    }}>
-                        <Image className="object-contain" src={showIconUrl} fill={true} alt="show password button" />
-                    </div>
-                </label>
-                <span className="text-red-500 text-sm mt-3 ms-2">{errorMessage}</span>
-                <button className="mt-4 px-4 py-2 bg-[#1A4789] hover:cursor-pointer active:bg-[#154284] text-white rounded-md" onClick={handleFunction}>{buttonLabel}</button>
-            </form>
-            <div className="w-full absolute bottom-12 left-0 h-6 px-6 md:px-10 lg:px-12 flex justify-between">
-                {linkNodes}
+                    <label className="relative mt-6">
+                        <input className="ps-3 pe-12 py-1 outline-2 outline-slate-100 rounded-md hover:bg-slate-50 focus:bg-slate-50 focus:outline-slate-200 w-full" value={password} type={inputPasswordType} placeholder="password" onChange={(e) => {
+                            if (!e.target.value.includes(" ")) {
+                                setPassword(e.target.value);
+                                setErrorMessage("");
+                            }
+                        }} />
+                        <div className="absolute right-4 top-1/2 -translate-y-[50%] h-6 w-6 hover:cursor-pointer" onClick={(e) => {
+                            setIsPasswordShown(!isPasswordShown);
+                        }}>
+                            <Image className="object-contain" src={showIconUrl} fill={true} alt="show password button" />
+                        </div>
+                    </label>
+                    <span className="text-red-500 text-sm mt-3 ms-2">{errorMessage}</span>
+                    <button className="mt-4 px-4 py-2 bg-[#1A4789] hover:cursor-pointer active:bg-[#154284] text-white rounded-md" onClick={handleFunction}>{buttonLabel}</button>
+                </form>
+                <div className="w-full absolute bottom-12 left-0 h-6 px-6 md:px-10 lg:px-12 flex justify-between">
+                    {linkNodes}
+                </div>
             </div>
-        </div>
-    );
+        );
+    } else {
+        return (
+            <div className="h-[28rem] w-[32rem] bg-white rounded-md drop-shadow-md relative px-6 md:px-10 lg:px-12 flex justify-center items-center">
+                <CircularProgress />
+            </div>
+        );
+    }
 }
