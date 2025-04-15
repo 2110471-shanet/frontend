@@ -4,7 +4,6 @@ import "./globals.css";
 import GlobalLoadingProvider from "@/components/provider/GlobalLoadingProvider";
 import UsernameProvider from "@/components/provider/UsernameProvider";
 import GroupMemberContextProvider from "@/components/provider/GroupMemberProvider";
-import SocketProvider from "@/components/provider/SocketProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -35,15 +34,13 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${noto_sans_thai.className} antialiased`}
       >
-        <SocketProvider>
-          <GlobalLoadingProvider>
-            <UsernameProvider>
-              <GroupMemberContextProvider>
-                {children}
-              </GroupMemberContextProvider>
-            </UsernameProvider>
-          </GlobalLoadingProvider>
-        </SocketProvider>
+        <GlobalLoadingProvider>
+          <UsernameProvider>
+            <GroupMemberContextProvider>
+              {children}
+            </GroupMemberContextProvider>
+          </UsernameProvider>
+        </GlobalLoadingProvider>
       </body>
     </html>
   );
