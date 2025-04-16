@@ -43,27 +43,27 @@ export default function ChatSelect({
                 <span className="shrink-0 w-full text-center py-1 outline outline-slate-200">Groups</span>
                 <div className="flex-1 w-full px-4 py-4 gap-4 flex flex-col flex-nowrap overflow-auto [scrollbar-width:none] md:[scrollbar-width:thin]">
                     <CreateGroup />
-                    <Group />
-                    <Group />
-                    <Group />
-                    <Group />
-                    <Group />
-                    <Group />
-                    <Group />
-                    <Group />
-                    <Group />
-                    <Group />
-                    <Group />
-                    <Group />
-                    <Group />
-                    <Group />
-                    <Group />
-                    <Group />
-                    <Group />
-                    <Group />
-                    <Group />
-                    <Group />
-                    <Group />
+                    <Group isJoined={true} />
+                    <Group isJoined={true} />
+                    <Group isJoined={true} />
+                    <Group isJoined={true} />
+                    <Group isJoined={true} />
+                    <Group isJoined={true} />
+                    <Group isJoined={true} />
+                    <Group isJoined={true} />
+                    <Group isJoined={true} />
+                    <Group isJoined={true} />
+                    <Group isJoined={true} />
+                    <Group isJoined={true} />
+                    <Group isJoined={true} />
+                    <Group isJoined={true} />
+                    <Group isJoined={true} />
+                    <Group isJoined={true} />
+                    <Group isJoined={true} />
+                    <Group isJoined={true} />
+                    <Group isJoined={true} />
+                    <Group isJoined={true} />
+                    <Group isJoined={true} />
                 </div>
             </div>
             <LinkGroup />

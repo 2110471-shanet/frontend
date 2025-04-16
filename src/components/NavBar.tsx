@@ -18,7 +18,6 @@ const league_spartan = League_Spartan({
     weight: ["600", "700", "800", "900"],
 });
 
-
 export default function NavBar({
     isChatSelectionShown,
     setIsChatSelectionShown,

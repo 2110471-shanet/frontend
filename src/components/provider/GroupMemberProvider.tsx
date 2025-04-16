@@ -3,16 +3,7 @@
 import { createContext, useMemo, useState, useContext } from "react";
 import Person2RoundedIcon from '@mui/icons-material/Person2Rounded';
 
-type Members = Array<string>;
-
-type GroupMemberContextType = {
-    isShowingMember: boolean;
-    groupName: string,
-    members: Members;
-    setIsShowingMember: React.Dispatch<React.SetStateAction<boolean>>;
-    setGroupName: React.Dispatch<React.SetStateAction<string>>;
-    setMembers: React.Dispatch<React.SetStateAction<Members>>;
-}
+import type { GroupMemberContextType, MembersType } from "@/types";
 
 const GroupMemberContext = createContext<GroupMemberContextType | undefined>(undefined);
 
@@ -22,7 +13,7 @@ export function useGroupMember() {
         throw new Error("useGroupMember must be used within a GroupMemberProvider");
     }
     return context;
-}
+};
 
 export default function GroupMemberContextProvider({
     children,
@@ -32,7 +23,7 @@ export default function GroupMemberContextProvider({
 
     const [isShowingMember, setIsShowingMember] = useState(false);
     const [groupName, setGroupName] = useState<string>("");
-    const [members, setMembers] = useState<Members>([]);
+    const [members, setMembers] = useState<MembersType>([]);
 
     const contextValue = useMemo(() => ({isShowingMember, groupName, members, setIsShowingMember, setGroupName, setMembers}), [isShowingMember, members]);
 

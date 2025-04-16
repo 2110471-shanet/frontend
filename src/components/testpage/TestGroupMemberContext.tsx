@@ -42,6 +42,25 @@ export default function TestGroupMemberContext() {
         }
     }, [activeGroupIndex, mockGroups]);
 
+    useEffect(() => {
+        let i = 0;
+        const myInterval = setInterval(() => {
+            if (i === 0) {
+                setMockGroups([{
+                    groupName: mockGroups[0].groupName,
+                    members: [...mockGroups[0].members, "JoggyJoe"]
+                 }, ...mockGroups.slice(1)]);
+                 i++;
+            } else {
+                setMockGroups(mockGroups);
+                i--;
+            }
+        }, 500);
+        return () => {
+            clearInterval(myInterval);
+        }
+    }, [])
+
     return (
         <div className="flex gap-2">
             <button className="px-4 py-2 bg-green-600 rounded-md text-white hover:cursor-pointer hover:bg-green-700 active:bg-green-800 duration-100" onClick={(e) => {

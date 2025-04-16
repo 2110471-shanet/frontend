@@ -74,7 +74,7 @@ export default function ChangeNameMobile({
                         setInputValue(e.target.value);
                     }
                 }} onKeyDown={handleSettingUsername} />
-                <div className="h-6 w-6 bg-green-500 shrink-0 ms-2" onClick={async (e) => {
+                <div className="h-6 w-6 bg-green-500 shrink-0 ms-2 hover:cursor-pointer rounded-sm" onClick={async (e) => {
                     if (inputValue === "") {
                         setIsSettingUsername(false);
                         setInputValue("");
@@ -91,7 +91,7 @@ export default function ChangeNameMobile({
                 }}>
                     <DoneRoundedIcon sx={{height: "100%", width: "100%", objectFit: "contain", color: "white",}} />
                 </div>
-                <div className="h-6 w-6 bg-red-500 shrink-0 ms-2" onClick={async (e) => {
+                <div className="h-6 w-6 bg-red-500 shrink-0 ms-2 hover:cursor-pointer rounded-sm" onClick={async (e) => {
                     setIsSettingUsername(false);
                     setInputValue("");
                 }}>
