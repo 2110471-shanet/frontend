@@ -1,7 +1,9 @@
 "use client"
 
+import { useGlobalLoading } from '@/components/provider/GlobalLoadingProvider';
+import { useUsername } from '@/components/provider/UsernameProvider';
 import { getSocket } from '@/lib/socket';
-import { useState, useEffect, useRef, RefObject } from 'react' ;
+import { useState, useEffect, useRef, RefObject, SyntheticEvent } from 'react' ;
 import { Socket } from 'socket.io-client';
 
 type UserType = {
@@ -10,113 +12,154 @@ type UserType = {
     status: boolean,
 }
 
-type refType = {
-    message: string, 
-    res: string, 
-    userList: UserType[], 
-    usernames: string[],
-}
-
-type StateType = {
-    message: string, 
-    res: string, 
-    userList: UserType[], 
-    usernames: string[],
-    setMessage: React.Dispatch<React.SetStateAction<string>>, 
-    setRes: React.Dispatch<React.SetStateAction<string>>, 
-    setUserList: React.Dispatch<React.SetStateAction<UserType[]>>,
-    setUsernames: React.Dispatch<React.SetStateAction<string[]>>,
-}
-
-function useChatState() {
-    const [ message, setMessage ] = useState<string>('') ;
-    const [ res, setRes ] = useState<string>('') ;
-    const [ userList, setUserList ] = useState<UserType[]>([]) ;
-    const [ usernames, setUsernames ] = useState<string[]>([]) ;
-
-    return { 
-        message, setMessage, 
-        res, setRes, 
-        userList, setUserList,
-        usernames, setUsernames,
-    }
-}
-
-function socketHandler(socket: Socket, chatState: StateType, stateRef: RefObject<refType>) {
-    const { 
-        message, setMessage, 
-        res, setRes, 
-        userList, setUserList,
-        usernames, setUsernames,
-    } = chatState ;
-
-    socket.on('retrieve-user', (userList: UserType[]) => {
-        setUserList(userList) ;
-    });
-
-    socket.on('active', (newUser: UserType) => {
-        setUserList([ ...stateRef.current.userList, newUser ]) ;
-    });
-    
-    socket.on('inactive', (disconnectedUser: UserType) => {
-        setUserList(prevUserList => prevUserList.filter(user => user._id !== disconnectedUser._id));
-    });
-
-    socket.on('user-connected', message => {
-        setMessage(message) ;
-    });
-
-    socket.on('ack', message => {
-        setRes(message) ;
-        console.log(stateRef.current.userList) ;
-    });
+type ChatRoomType = {
+    _id: string,
+    chatName: string,
+    members: string[],
+    numMembers: number,
 }
 
 export default function TestSocket() {
-    const socket = getSocket('goat') ;
-    const chatState = useChatState()
-    const { 
-        message, setMessage, 
-        res, setRes, 
-        userList, setUserList,
-        usernames, setUsernames,
-    } = chatState ;
+    const socket = getSocket() ;
 
-    const stateRef = useRef({
-        message: '' as string,
-        res: '' as string,
-        userList: [] as UserType[],
-        usernames: [] as string[],
-    })
+    const [ userInfo, setUserInfo ] = useState<string>('') ;
+    const [ message, setMessage ] = useState<string>('') ;
+    const [ receivedMessage, setReceivedMessage ] = useState<string>('') ;
+    const [ userList, setUserList ] = useState<UserType[]>([]) ;
+    const [ usernames, setUsernames ] = useState<string[]>([]) ;
+    const [ chatrooms, setChatrooms ] = useState<ChatRoomType[]>([]) ;
+    const [ chatroom, setChatroom ] = useState<string>('') ;
 
-    function handleClick() {
-        console.log('ping') ;
-        socket.emit('ping') ;
+    const { username, setUsername } = useUsername() ;
+    const { isLoading, setIsLoading } = useGlobalLoading() ;
+
+    const isFirstLoadSucceed = useRef(false) ;
+
+    function handleFetchUser() {
+        socket.emit('user-disconnect') ;
+        socket.emit('update-user', username, (connectionInfo: string, userList: UserType[]) => {
+            console.log(`username updated: ${username}`) ;
+            setUserInfo(connectionInfo) ;
+            setUserList(userList) ;
+        })
+    }
+
+    function handleJoinChatroom() {
+        console.log(`joined chatroom: ${chatroom}`) ;
+        socket.emit('join-chatroom', chatroom) ;
+    }
+
+    function handleSendMessage(e: SyntheticEvent<HTMLButtonElement>) {
+        socket.emit('send-message', message, chatroom, async (message: string) => {
+            console.log(message) ;
+        });
     }
 
     useEffect(() => {
-        socketHandler(socket, chatState, stateRef) ;
-    }, []) ;
+        socket.on('retrieve-users', (userList: Array<UserType>) => {
+            setUserList(userList) ;
+        });
 
-    useEffect(() => {
-        stateRef.current = {
-            message,
-            res,
-            userList,
-            usernames,
-        };
-    }, [message, res, userList, usernames])
+        socket.on('retrieve-chatrooms', (chatrooms: Array<ChatRoomType>) => {
+            setChatrooms(chatrooms) ;
+        });
+    
+        socket.on('active', (newUser: UserType) => {
+            setUserList([ ...userList, newUser ]) ;
+        });
+    
+        socket.on('user-connected', (userInfo: string) => {
+            setUserInfo(userInfo) ;
+        });
+        
+        socket.on('receive-message', (message: string, ) => {
+            setReceivedMessage(message) ;
+        });
+
+        return () => {
+            socket.disconnect() ;
+        }
+    }, []) ;
 
     useEffect(() => {
         setUsernames(userList.map((user: UserType) => user.username)) ;
     }, [userList])
 
+    useEffect(() => {
+        if (!isLoading) {
+            if (isFirstLoadSucceed.current) {
+                console.log(username) ;
+
+                socket.auth = { token: username };
+                socket.connect();
+            }
+
+            isFirstLoadSucceed.current = true ;
+        }
+    }, [isLoading, isFirstLoadSucceed]);
+
     return (
-        <div className="h-screen flex flex-col gap-4 justify-center items-center bg-slate-50">
-            <h1> { res } </h1>
-            <h1 className="whitespace-pre-wrap"> { message } </h1>
-            <button className="bg-slate-300 p-5 rounded-md hover:bg-slate-400 active:bg-slate-300" onClick={handleClick}> test </button>
-            <h1 className="whitespace-pre-wrap"> { usernames.join('\n') } </h1>
+        <div className="min-h-screen flex items-center justify-center gap-6 bg-slate-100 p-6"> 
+            <div>
+                <span> All Chatrooms </span>
+                <div className="bg-white border border-gray-300 rounded p-4 w-128 whitespace-pre-wrap mb-10">
+                    { chatrooms.map(chatroom => chatroom.chatName).join('\n') } ;
+                </div>
+
+                <span> All Users </span>
+                <div className="bg-white border border-gray-300 rounded p-4 w-128 whitespace-pre-wrap">
+                    { usernames.join('\n') }
+                </div>
+            </div>
+
+            <div className="min-h-screen flex flex-col justify-center bg-slate-100 p-6">
+                <span> Username </span>
+                <input
+                    type="text"
+                    className="border border-gray-300 rounded p-2 w-64 mb-5"
+                    value={username}
+                    onChange={e => setUsername(e.target.value)}
+                />
+                
+                <span> Chatroom </span>
+                <input
+                    type="text"
+                    className="border border-gray-300 rounded p-2 w-64 mb-10"
+                    value={chatroom}
+                    onChange={e => setChatroom(e.target.value)}
+                />
+
+                <span> Message: </span>
+                <input
+                    type="text"
+                    value={message}
+                    onChange={(e) => setMessage(e.target.value)}
+                    className="bg-white border border-gray-300 rounded p-4 w-128 whitespace-pre-wrap mb-5"
+                />
+                
+                <span> Received Message: </span>
+                <input
+                    type="text"
+                    value={receivedMessage}
+                    onChange={(e) => setReceivedMessage(e.target.value)}
+                    className="bg-white border border-gray-300 rounded p-4 w-128 whitespace-pre-wrap"
+                />
+
+                <button
+                    className="bg-blue-500 hover:bg-blue-600 text-white rounded px-4 py-2 mt-5 mb-10"
+                    onClick={handleSendMessage}
+                > Send Message </button>
+                
+                <button
+                    className="bg-blue-500 hover:bg-blue-600 text-white rounded px-4 py-2 mb-5"
+                    onClick={handleFetchUser}
+                > Fetch User </button>
+
+                <button
+                    className="bg-blue-500 hover:bg-blue-600 text-white rounded px-4 py-2 mb-5"
+                    onClick={handleJoinChatroom}
+                > Join Chatroom </button>
+            </div>
         </div>
     );
 }
