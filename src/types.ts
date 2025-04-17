@@ -12,7 +12,7 @@ type UserContextType = {
 
 type MembersType = Array<string>;
 
-type GroupMemberContextType = {
+type GroupContextType = {
     isShowingMember: boolean;
     groupName: string;
     members: MembersType;
@@ -36,4 +36,4 @@ type MessagesContextType = {
     setMessages: React.Dispatch<React.SetStateAction<Array<MessageType>>>;
 };
 
-export type { GlobalLoadingContextType, UserContextType, MembersType, GroupMemberContextType, ChatSelectionStateContextType, MessageType, MessagesContextType };
+export type { GlobalLoadingContextType, UserContextType, MembersType, GroupContextType, ChatSelectionStateContextType, MessageType, MessagesContextType };
