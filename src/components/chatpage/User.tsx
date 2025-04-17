@@ -23,14 +23,13 @@ export default function User({
     const { 
         chatSelectionState, setChatSelectionState,
         selectedChat, setSelectedChat,
+        isSelectedDirectChat, setIsSelectedDirectChat,
     } = useChatSelectionState();
 
     async function handleChatSelection(e: SyntheticEvent<HTMLDivElement>) {
         if (chatSelectionState !== "loading") {
             setChatSelectionState("loading");
-            // await new Promise((resolve) => {
-            //     setTimeout(resolve, 500);
-            // });
+            setIsSelectedDirectChat(true) ;
             setSelectedChat(userId) ;
             setChatSelectionState("ready");
         }

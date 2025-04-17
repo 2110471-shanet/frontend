@@ -22,7 +22,7 @@ type MembersType = Array<string>;
 type GroupType = {
     _id: string,
     chatName: string,
-    lastmessage: string,
+    lastMessage: string,
     members: Array<UserType>,
     numUnread: number,
 }
@@ -30,10 +30,10 @@ type GroupType = {
 type GroupContextType = {
     isShowingMember: boolean;
     groupName: string;
-    members: MembersType;
+    members: Array<UserType>;
     setIsShowingMember: React.Dispatch<React.SetStateAction<boolean>>;
     setGroupName: React.Dispatch<React.SetStateAction<string>>;
-    setMembers: React.Dispatch<React.SetStateAction<MembersType>>;
+    setMembers: React.Dispatch<React.SetStateAction<Array<UserType>>>;
 };
 
 type ChatSelectionStateContextType = {
@@ -41,6 +41,8 @@ type ChatSelectionStateContextType = {
     setChatSelectionState: React.Dispatch<React.SetStateAction<string>>;
     selectedChat: string;
     setSelectedChat: React.Dispatch<React.SetStateAction<string>>;
+    isSelectedDirectChat: boolean;
+    setIsSelectedDirectChat: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
 type MessageType = {

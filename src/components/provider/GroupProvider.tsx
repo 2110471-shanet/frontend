@@ -3,7 +3,7 @@
 import { createContext, useMemo, useState, useContext } from "react";
 import Person2RoundedIcon from '@mui/icons-material/Person2Rounded';
 
-import type { GroupContextType, MembersType } from "@/types";
+import type { GroupContextType, MembersType, UserType } from "@/types";
 
 const GroupContext = createContext<GroupContextType | undefined>(undefined);
 
@@ -23,7 +23,7 @@ export default function GroupProvider({
 
     const [isShowingMember, setIsShowingMember] = useState(false);
     const [groupName, setGroupName] = useState<string>("");
-    const [members, setMembers] = useState<MembersType>([]);
+    const [members, setMembers] = useState<Array<UserType>>([]);
 
     const contextValue = useMemo(() => ({
         isShowingMember, groupName, members, 
@@ -33,11 +33,11 @@ export default function GroupProvider({
     const memberNodes = (
         members.map((member, ind) => {
             return (
-                <div className="flex gap-2 w-full shrink-0" key={member+ind}>
+                <div className="flex gap-2 w-full shrink-0" key={member.username+ind}>
                     <div className="h-6 w-6 relative flex shrink-0 justify-center items-center bg-slate-600 rounded-md">
                         <Person2RoundedIcon sx={{height: "85%", width: "85%", color: "white",}} />
                     </div>
-                    <span key={member} className="flex-1 truncate">{member}</span>
+                    <span key={member.username} className="flex-1 truncate">{member.username}</span>
                 </div>
             );
         })

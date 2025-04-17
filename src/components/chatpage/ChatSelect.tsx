@@ -28,7 +28,7 @@ export default function ChatSelect({
     const groupNodes = (
         groups.map((groupInfo, ind) => {
             return (
-                <Group key={ind} groupName={groupInfo.chatName} isJoined={false} onClickHandler={(e: SyntheticEvent<HTMLDivElement>) => {
+                <Group key={ind} group={groupInfo} onClickHandler={(e: SyntheticEvent<HTMLDivElement>) => {
                     console.log(groupInfo._id);
                 }} />
             );

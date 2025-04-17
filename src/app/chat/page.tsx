@@ -6,7 +6,7 @@ import NavBar from "@/components/NavBar";
 import { useState, useEffect, createContext, useMemo, useContext, useRef } from "react";
 import { ChatSelectionStateContext, MessagesContext } from "./pageContext";
 
-import type { GroupType, MessageType, UserType } from "@/types";
+import { ChatSelectionStateContextType, type GroupType, type MessageType, type UserType } from "@/types";
 import { getSocket } from "@/lib/socket";
 
 import { useGlobalLoading } from "@/components/provider/GlobalLoadingProvider";
@@ -21,11 +21,13 @@ export default function Chat() {
     // empty, loading, ready
     const [chatSelectionState, setChatSelectionState] = useState("empty");
     const [selectedChat, setSelectedChat] = useState<string>('') ;
+    const [isSelectedDirectChat, setIsSelectedDirectChat] = useState<boolean>(false);
 
     const chatSelectionStateContextValue = useMemo(() => ({
         chatSelectionState, setChatSelectionState,
         selectedChat, setSelectedChat,
-    }), [chatSelectionState]);
+        isSelectedDirectChat, setIsSelectedDirectChat,
+    }), [chatSelectionState, selectedChat, isSelectedDirectChat]);
 
     // [{sender, message}]
     const [messages, setMessages] = useState<Array<MessageType>>([]);
@@ -91,7 +93,11 @@ export default function Chat() {
     }
 
     async function fetchMessages() {
-        const res = await customAxios.get(`/api/messages/directMessages/${selectedChat}`) ;
+        const requestPath = `/api/messages/${(isSelectedDirectChat ? 'directMessages/' : '')}${selectedChat}` ;
+        const res = await customAxios(requestPath) ;
+
+        console.log(requestPath) ;
+        console.log(res.data) ;
 
         setMessages(res.data) ;
         messagesRef.current = res.data ;
@@ -160,11 +166,33 @@ export default function Chat() {
 
                 setMessages(updatedMessages) ;
                 messagesRef.current = updatedMessages ;
-            })
+            });
+
+            socket.on('user-joined-chatroom', (user, groupId) => {
+                const updatedGroups = groupsRef.current.map(group =>
+                    group._id === groupId ? { 
+                        _id: group._id,
+                        chatName: group.chatName,
+                        lastMessage: group.lastMessage,
+                        numUnread: group.numUnread,
+                        members: [
+                            ...group.members, {
+                                _id: user._id,
+                                username: user.username,
+                                status: user.status,
+                                unreadCount: 0,
+                            }
+                        ]
+                    } : group
+                );
+
+                setGroups(updatedGroups) ;
+                groupsRef.current = updatedGroups;
+            });
 
             socket.on('errors', (errorMessage: string) => {
                 console.log(errorMessage) ;
-            })
+            });
     
         }
 
