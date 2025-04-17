@@ -46,8 +46,13 @@ export default function User({
                     "Offline"}
                 </span>
             </div>
-            <div className={`w-6 h-6 rounded-full text-white flex justify-center items-center ${(numUnread === 0)? "hidden": ""} ${(status==="online")? "bg-red-500": "bg-slate-500"}`}>
-                <span>{numUnread}</span>
+            <div className={`w-8 h-6 rounded-full text-white flex justify-center items-center ${(numUnread === 0)? "hidden": ""} ${(status==="online")? "bg-red-500": "bg-slate-500"}`}>
+                <span className="max-w-full truncate text-xs">
+                    {(numUnread > 99)?
+                        "99+":
+                        numUnread
+                    }
+                </span>
             </div>
         </div>
     );
