@@ -2,7 +2,7 @@
 
 import Person2RoundedIcon from '@mui/icons-material/Person2Rounded';
 
-import { useChatSelectionState } from '@/app/chat/page';
+import { useChatSelectionState } from '@/app/chat/pageContext';
 import { SyntheticEvent } from 'react';
 
 // username, isOnline, other set staet function...

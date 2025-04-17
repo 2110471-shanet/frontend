@@ -3,9 +3,11 @@ type GlobalLoadingContextType = {
     setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
-type UsernameContextType = {
+type UserContextType = {
     username: string;
+    userId: string;
     setUsername: React.Dispatch<React.SetStateAction<string>>;
+    setUserId: React.Dispatch<React.SetStateAction<string>>;
 };
 
 type MembersType = Array<string>;
@@ -34,4 +36,4 @@ type MessagesContextType = {
     setMessages: React.Dispatch<React.SetStateAction<Array<MessageType>>>;
 };
 
-export type { GlobalLoadingContextType, UsernameContextType, MembersType, GroupMemberContextType, ChatSelectionStateContextType, MessageType, MessagesContextType };
+export type { GlobalLoadingContextType, UserContextType, MembersType, GroupMemberContextType, ChatSelectionStateContextType, MessageType, MessagesContextType };

@@ -4,7 +4,7 @@ import { CircularProgress } from "@mui/material";
 import Messages from "./Messages";
 import TextInput from "./TextInput";
 
-import { useChatSelectionState } from "@/app/chat/page";
+import { useChatSelectionState } from "@/app/chat/pageContext";
 
 export default function ChatBox() {
 

@@ -1,4 +1,4 @@
-import { SyntheticEvent, useEffect } from "react";
+import { SyntheticEvent, useEffect, useState } from "react";
 import ChangeNameMobile from "./ChangeNameMobile"
 import CreateGroup from "./CreateGroup";
 import Group from "./Group";
@@ -106,11 +106,22 @@ export default function ChatSelect({
         }
     ];
 
+    const [users, setUsers] = useState<Array<UserType>>([]) ;
+
     async function fetchUsers() {
         try {
             const res = await customAxios.get('/api/users') ;
 
-            console.log(res) ;
+            // setUsers(res.data.)
+
+            setUsers(res.data.map((user: {_id: string, username: string, status: string}) => {
+                return {
+                    id: user._id,
+                    username: user.username,
+                    status: user.status,
+                    numUnread: 1,
+                }
+            })) ;
         } catch (error) {
             console.log(`error trying to fetch users: ${error}`)
         }
@@ -121,7 +132,7 @@ export default function ChatSelect({
     }, [])
 
     const userNodes = (
-        mockUserInfo.map((userInfo, ind) => {
+        users.map((userInfo, ind) => {
             return (
                 <User key={ind} username={userInfo.username} status={userInfo.status} numUnread={userInfo.numUnread} onClickHandler={(e: SyntheticEvent<HTMLDivElement>) => {
                     console.log(userInfo.id);
