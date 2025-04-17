@@ -13,6 +13,8 @@ import Link from "next/link";
 import { League_Spartan } from "next/font/google";
 import Image from "next/image";
 
+import customAxios from "@/axios";
+
 const league_spartan = League_Spartan({
     subsets: ["latin"],
     weight: ["600", "700", "800", "900"],
@@ -59,11 +61,17 @@ export default function NavBar({
     async function handleSignOut(e: SyntheticEvent<HTMLButtonElement>) {
         e.preventDefault();
         e.stopPropagation();
-        setIsLoading(true);
-        await new Promise((resolve) => {
-            setTimeout(resolve, 1000);
-        });
-        await router.push("/signin");
+        try {
+            setIsLoading(true);
+            const res = await customAxios.get("/auth/logout");
+            router.push("signin");
+            await new Promise((resolve) => {
+                setTimeout(resolve, 100);
+            });
+            setIsLoading(false);
+        } catch {
+            setIsLoading(false);
+        }
         setIsLoading(false);
     }
 
