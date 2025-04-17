@@ -3,10 +3,7 @@
 import { CircularProgress } from "@mui/material";
 import { createContext, useMemo, useState, useContext } from "react";
 
-type GlobalLoadingContextType = {
-    isLoading: boolean;
-    setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
-};
+import type { GlobalLoadingContextType } from "@/types";
 
 const GlobalLoadingContext = createContext<GlobalLoadingContextType | undefined>(undefined);
 
@@ -19,9 +16,9 @@ export function useGlobalLoading() {
 };
 
 export default function GlobalLoadingProvider({
-    children
+    children,
 }: {
-    children: React.ReactNode
+    children: React.ReactNode,
 }) {
 
     const [isLoading, setIsLoading] = useState(false);
@@ -30,7 +27,7 @@ export default function GlobalLoadingProvider({
 
     return (
         <div className="relative">
-            <div className={`absolute top-0 left-0 h-screen w-full bg-white z-50 flex justify-center items-center ${(isLoading) ? "": "hidden"}`}>
+            <div className={`absolute top-0 left-0 h-screen w-full bg-white z-70 flex justify-center items-center ${(isLoading) ? "": "hidden"}`}>
                 <CircularProgress />
             </div>
             <GlobalLoadingContext value={contextValue}>
