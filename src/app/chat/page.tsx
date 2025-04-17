@@ -167,6 +167,23 @@ export default function Chat() {
                 setMessages(updatedMessages) ;
                 messagesRef.current = updatedMessages ;
             });
+            
+            socket.on('receive-message', (message, sender, chatId) => {
+                if (chatId !== selectedChatRef.current)
+                    return ;
+
+                const updatedMessages = [
+                    ...messagesRef.current, {
+                    message: message,
+                    sender: {
+                        _id: sender._id,
+                        username: sender.username,
+                    },
+                }];
+
+                setMessages(updatedMessages) ;
+                messagesRef.current = updatedMessages ;
+            });
 
             socket.on('user-joined-chatroom', (user, groupId) => {
                 const updatedGroups = groupsRef.current.map(group =>

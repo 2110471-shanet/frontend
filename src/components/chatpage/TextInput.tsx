@@ -9,17 +9,30 @@ import { useUser } from '../provider/UserProvider';
 export default function TextInput() {
     const [inputValue, setInputValue] = useState<string>('') ;
     
-    const { selectedChat, setSelectedChat } = useChatSelectionState() ;
+    const { selectedChat, setSelectedChat, isSelectedDirectChat } = useChatSelectionState() ;
     const { messages, setMessages } = useMessages() ;
     const { userId, username } = useUser() ;
 
     const socket = getSocket() ;
 
-    function sendMessageHandler() {
-        // console.log(inputValue) ;
+    function sendDirectMessage() {
         socket.emit('send-direct-message', inputValue, selectedChat, async (message: string) => {
             console.log(message) ;
         });
+    }
+
+    function sendGroupMessage() {
+        socket.emit('send-message', inputValue, selectedChat, async (message: string) => {
+            console.log(message) ;
+        });
+    }
+
+    function sendMessageHandler() {
+        if (isSelectedDirectChat) {
+            sendDirectMessage();
+        } else {
+            sendGroupMessage();
+        }
 
         setMessages([
             ...messages, {
