@@ -5,6 +5,7 @@ import AddCircleOutlineRoundedIcon from '@mui/icons-material/AddCircleOutlineRou
 import { useGlobalLoading } from '@/components/provider/GlobalLoadingProvider';
 
 import { KeyboardEvent, useState } from 'react';
+import { getSocket } from '@/lib/socket';
 
 function checkForAlphabet(s: string) {
     let alphabet = "abcdefghijklmnopqrstuvwxyz";
@@ -23,6 +24,8 @@ export default function CreateGroup() {
     const [inputValue, setInputValue] = useState("");
     const [isSettingName, setIsSettingName] = useState(false);
 
+    const socket = getSocket() ;
+
     async function handleSettingUsername(e: KeyboardEvent<HTMLInputElement>) {
         if (e.key === "Enter") {
             if (!checkForAlphabet(inputValue)) {
@@ -30,9 +33,12 @@ export default function CreateGroup() {
                 setIsSettingName(false);
             } else {
                 setIsLoading(true);
-                await new Promise((resolve) => {
-                    setTimeout(resolve, 1000);
-                });
+                // await new Promise((resolve) => {
+                //     setTimeout(resolve, 1000);
+                // });
+
+                socket.emit('create-room', inputValue) ;
+
                 setIsSettingName(false);
                 setIsLoading(false);
             }

@@ -117,6 +117,18 @@ export default function Chat() {
                 );
 
                 setUsers(updatedUsers);
+                usersRef.current = updatedUsers ;
+            });
+
+            socket.on('room-created', (room) => {
+                const updatedGroups = [
+                    ...groupsRef.current, {
+                    ...room,
+                    numunread: 0,
+                }];
+
+                setGroups(updatedGroups) ;
+                groupsRef.current = updatedGroups ;
             });
         }
 
