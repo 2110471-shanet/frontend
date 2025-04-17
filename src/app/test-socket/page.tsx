@@ -1,7 +1,7 @@
 "use client"
 
 import { useGlobalLoading } from '@/components/provider/GlobalLoadingProvider';
-import { useUsername } from '@/components/provider/UsernameProvider';
+import { useUser } from '@/components/provider/UserProvider';
 import { getSocket } from '@/lib/socket';
 import { useState, useEffect, useRef, SyntheticEvent } from 'react' ;
 
@@ -31,7 +31,7 @@ export default function TestSocket() {
     const [ isTyping, setIsTyping ] = useState<boolean>(false) ;
     const [ typer, setTyper ] = useState<string>('') ;
 
-    const { username, setUsername } = useUsername() ;
+    const { username, setUsername } = useUser() ;
     const { isLoading, setIsLoading } = useGlobalLoading() ;
 
     const isFirstLoadSucceed = useRef(false) ;

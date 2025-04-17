@@ -5,18 +5,19 @@ import { usePathname } from "next/navigation";
 import { useGlobalLoading } from "./GlobalLoadingProvider";
 
 import type { UsernameContextType } from "@/types";
+import customAxios from "@/axios";
 
-const UsernameContext = createContext<UsernameContextType | undefined>(undefined);
+const UserContext = createContext<UsernameContextType | undefined>(undefined);
 
-export function useUsername() {
-    const context = useContext(UsernameContext);
+export function useUser() {
+    const context = useContext(UserContext);
     if (!context) {
         throw new Error("useUsername must be used within a UsernameProvider");
     }
     return context;
 };
 
-export default function UsernameProvider({
+export default function UserProvider({
     children,
 }: {
     children: React.ReactNode,
@@ -24,8 +25,9 @@ export default function UsernameProvider({
     
     const {isLoading, setIsLoading} = useGlobalLoading();
     const [username, setUsername] = useState("loading");
+    const [userId, setUserId] = useState('loading');
 
-    const contextValue = useMemo(() => ({ username, setUsername }), [username]);
+    const contextValue = useMemo(() => ({ username, setUsername, userId, setUserId }), [username, userId]);
 
     const pathname = usePathname();
 
@@ -42,12 +44,24 @@ export default function UsernameProvider({
             setUsername("LindaLunda");
             setIsLoading(false);
         };
-        testLoadUsername();
+        // testLoadUsername();
+
+        async function loadUser() {
+            setIsLoading(true) ;
+            const res = await customAxios.get('/api/user') ;
+
+            console.log(res)
+
+            setUsername(res.data.user.username) ;
+            setIsLoading(false) ;
+        }
+
+        loadUser() ;
     }, [])
 
     return (
-        <UsernameContext value={contextValue}>
+        <UserContext value={contextValue}>
             {children}
-        </UsernameContext>
+        </UserContext>
     );
 }

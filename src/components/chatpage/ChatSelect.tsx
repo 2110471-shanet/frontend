@@ -106,8 +106,6 @@ export default function ChatSelect({
         }
     ];
 
-    // const res = await customAxios;
-
     async function fetchUsers() {
         try {
             const res = await customAxios.get('/api/users') ;

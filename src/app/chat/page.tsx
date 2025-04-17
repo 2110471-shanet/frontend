@@ -6,6 +6,7 @@ import NavBar from "@/components/NavBar";
 import { useState, useEffect, createContext, useMemo, useContext } from "react";
 
 import type { ChatSelectionStateContextType, MessageType, MessagesContextType } from "@/types";
+import { useUser } from "@/components/provider/UserProvider";
 
 // ==================== context ====================
 
@@ -43,7 +44,13 @@ export default function Chat() {
     // [{sender, message}]
     const [messages, setMessages] = useState<Array<MessageType>>([]);
 
+    const { username, setUsername } = useUser();
+
     const messagesContextValue = useMemo(() => ({messages, setMessages}), [messages]);
+
+    // useEffect(() => {
+    //     setUsername("hello") ;
+    // }, []);
 
     return (
         <div className="h-screen flex flex-col flex-nowrap w-full relative">

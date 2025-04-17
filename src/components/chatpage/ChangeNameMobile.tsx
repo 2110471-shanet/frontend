@@ -2,7 +2,7 @@
 
 import { KeyboardEvent, useState, useEffect } from "react";
 
-import { useUsername } from "@/components/provider/UsernameProvider";
+import { useUser } from "@/components/provider/UserProvider";
 import { useGlobalLoading } from "@/components/provider/GlobalLoadingProvider";
 
 import DoneRoundedIcon from '@mui/icons-material/DoneRounded';
@@ -16,7 +16,7 @@ export default function ChangeNameMobile({
     isChatSelectionShown: boolean
 }) {
 
-    const { username, setUsername } = useUsername();
+    const { username, setUsername } = useUser();
     const { isLoading, setIsLoading } = useGlobalLoading();
 
     const [ isSettingUsername, setIsSettingUsername ] = useState(true);

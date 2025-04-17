@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono, Noto_Sans_Thai } from "next/font/google";
 import "./globals.css";
 import GlobalLoadingProvider from "@/components/provider/GlobalLoadingProvider";
-import UsernameProvider from "@/components/provider/UsernameProvider";
+import UsernameProvider from "@/components/provider/UserProvider";
 import GroupMemberContextProvider from "@/components/provider/GroupMemberProvider";
 
 const geistSans = Geist({
