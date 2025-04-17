@@ -44,7 +44,7 @@ export default function UserProvider({
             setIsLoading(false);
         };
         testLoadUsername();
-    }, [])
+    }, [pathname])
 
     return (
         <UserContext value={contextValue}>
