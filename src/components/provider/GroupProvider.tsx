@@ -25,7 +25,10 @@ export default function GroupProvider({
     const [groupName, setGroupName] = useState<string>("");
     const [members, setMembers] = useState<MembersType>([]);
 
-    const contextValue = useMemo(() => ({isShowingMember, groupName, members, setIsShowingMember, setGroupName, setMembers}), [isShowingMember, members]);
+    const contextValue = useMemo(() => ({
+        isShowingMember, groupName, members, 
+        setIsShowingMember, setGroupName, setMembers
+    }), [isShowingMember, members]);
 
     const memberNodes = (
         members.map((member, ind) => {

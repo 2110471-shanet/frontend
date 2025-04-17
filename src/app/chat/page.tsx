@@ -6,9 +6,13 @@ import NavBar from "@/components/NavBar";
 import { useState, useEffect, createContext, useMemo, useContext, useRef } from "react";
 import { ChatSelectionStateContext, MessagesContext } from "./pageContext";
 
-import type { MessageType } from "@/types";
-import { useGlobalLoading } from "@/components/provider/GlobalLoadingProvider";
+import type { GroupType, MessageType, UserType } from "@/types";
 import { getSocket } from "@/lib/socket";
+
+import { useGlobalLoading } from "@/components/provider/GlobalLoadingProvider";
+import { useUser } from "@/components/provider/UserProvider";
+import { useGroup } from "@/components/provider/GroupProvider";
+import customAxios from "@/axios";
 
 export default function Chat() {
 
@@ -21,30 +25,85 @@ export default function Chat() {
 
     // [{sender, message}]
     const [messages, setMessages] = useState<Array<MessageType>>([]);
-
-    // const { username, setUsername } = useUser();
-    const { isLoading, setIsLoading } = useGlobalLoading() ;
+    const [users, setUsers] = useState<Array<UserType>>([]) ;
+    const [groups, setGroups] = useState<Array<GroupType>>([]) ;
 
     const isFirstLoadSucceed = useRef(false) ;
 
     const messagesContextValue = useMemo(() => ({messages, setMessages}), [messages]);
 
+    const { isLoading, setIsLoading } = useGlobalLoading() ;
+    const { 
+        username, userId,
+        setUsername, setUserId,
+    } = useUser() ;
+
+    const { 
+        isShowingMember, members, groupName, 
+        setIsShowingMember, setMembers, setGroupName 
+    } = useGroup() ;
+
+    const usersRef = useRef<Array<UserType>>([]) ;
+    const groupsRef = useRef<Array<GroupType>>([]) ;
+
     const socket = getSocket() ;
 
-    useEffect(() => {
-        if (!isLoading) {
-            if (isFirstLoadSucceed.current) {
-                socket.connect() ;
-            }
+    async function connectSocket() {
+        setIsLoading(true) ;
 
-            isFirstLoadSucceed.current = true ;
+        await fetchUser() ;
+        await fetchUsers() ;
+        await fetchChatRooms() ;
+
+        socket.connect() ;
+
+        setIsLoading(false) ;
+    }
+
+    async function disconnectSocket() {
+        if (socket.connected)
+            socket.disconnect() ;
+    }
+
+    async function fetchUser() {
+        const res = await customAxios.get('/api/user') ;
+
+        setUsername(res.data.user.username) ;
+        setUserId(res.data.user._id) ;
+    }
+
+    async function fetchUsers() {
+        const res = await customAxios.get('/api/users') ;
+
+        console.log(res.data) ;
+
+        setUsers(res.data) ;
+        usersRef.current = res.data ;
+    }
+
+    async function fetchChatRooms() {
+        const res = await customAxios.get('/api/chatrooms/all') ;
+
+        console.log(res.data) ;
+
+        setGroups(res.data) ;
+        groupsRef.current = res.data
+    }
+
+    useEffect(() => {
+        if (!socket.connected) {
+            connectSocket() ;
+
+            socket.on('connect', () => {
+                socket.emit('join-rooms', usersRef.current) ;
+                socket.emit('join-rooms', groupsRef.current) ;
+            })
         }
 
         return () => {
-            if (socket.connected)
-                socket.disconnect() ;
+            disconnectSocket() ;
         }
-    }, [isLoading, isFirstLoadSucceed]);
+    }, []);
 
     return (
         <div className="h-screen flex flex-col flex-nowrap w-full relative">
@@ -52,7 +111,11 @@ export default function Chat() {
             <main className="w-full flex flex-nowrap relative overflow-hidden flex-1 min-h-[300px]">
                 <MessagesContext value={messagesContextValue}>
                     <ChatSelectionStateContext value={chatSelectionStateContextValue}>
-                        <ChatSelect isChatSelectionShown={isChatSelectionShown} />
+                        <ChatSelect 
+                            isChatSelectionShown={isChatSelectionShown} 
+                            users={users}
+                            groups={groups}
+                        />
                         <ChatBox />
                     </ChatSelectionStateContext>
                 </MessagesContext>

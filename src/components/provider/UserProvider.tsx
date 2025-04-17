@@ -26,26 +26,10 @@ export default function UserProvider({
     const [username, setUsername] = useState("loading");
     const [userId, setUserId] = useState("");
 
-    const contextValue = useMemo(() => ({ username, userId, setUsername, setUserId }), [username, userId]);
-
-    const pathname = usePathname();
-
-    useEffect(() => {
-        const skipPaths = ["/signin", "/signup", "/test-ui", "/"];
-        if (skipPaths.includes(pathname)) {
-            return;
-        }
-
-        async function loadUser() {
-            setIsLoading(true) ;
-            const res = await customAxios.get('/api/user') ;
-
-            setUsername(res.data.user.username) ;
-            setIsLoading(false) ;
-        }
-
-        loadUser() ;
-    }, [pathname])
+    const contextValue = useMemo(() => ({ 
+        username, userId,
+        setUsername, setUserId,
+    }), [username, userId]);
 
     return (
         <UserContext value={contextValue}>

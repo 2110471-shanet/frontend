@@ -3,6 +3,13 @@ type GlobalLoadingContextType = {
     setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
+type UserType = {
+    id: string,
+    username: string,
+    status: string,
+    unreadCount: number,
+}
+
 type UserContextType = {
     username: string;
     userId: string;
@@ -11,6 +18,14 @@ type UserContextType = {
 };
 
 type MembersType = Array<string>;
+
+type GroupType = {
+    id: string,
+    chatName: string,
+    lastmessage: string,
+    members: Array<UserType>,
+    numUnread: number,
+}
 
 type GroupContextType = {
     isShowingMember: boolean;
@@ -36,4 +51,6 @@ type MessagesContextType = {
     setMessages: React.Dispatch<React.SetStateAction<Array<MessageType>>>;
 };
 
-export type { GlobalLoadingContextType, UserContextType, MembersType, GroupContextType, ChatSelectionStateContextType, MessageType, MessagesContextType };
+export type { 
+    GlobalLoadingContextType, UserContextType, MembersType, GroupContextType, ChatSelectionStateContextType, 
+    MessageType, MessagesContextType, UserType, GroupType };
