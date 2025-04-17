@@ -1,10 +1,10 @@
 "use client"
 
 import { useContext, useEffect, useState } from "react";
-import { useGroupMember } from "@/components/provider/GroupMemberProvider";
+import { useGroup } from "@/components/provider/GroupProvider";
 
 export default function TestGroupMemberContext() {
-    const {isShowingMember, members, groupName, setIsShowingMember, setMembers, setGroupName} = useGroupMember();
+    const {isShowingMember, members, groupName, setIsShowingMember, setMembers, setGroupName} = useGroup();
 
     const [mockGroups, setMockGroups] = useState([
         {

@@ -3,14 +3,14 @@
 import { createContext, useMemo, useState, useContext } from "react";
 import Person2RoundedIcon from '@mui/icons-material/Person2Rounded';
 
-import type { GroupMemberContextType, MembersType } from "@/types";
+import type { GroupContextType, MembersType } from "@/types";
 
-const GroupMemberContext = createContext<GroupMemberContextType | undefined>(undefined);
+const GroupContext = createContext<GroupContextType | undefined>(undefined);
 
-export function useGroupMember() {
-    const context = useContext(GroupMemberContext);
+export function useGroup() {
+    const context = useContext(GroupContext);
     if (!context) {
-        throw new Error("useGroupMember must be used within a GroupMemberProvider");
+        throw new Error("useGroup must be used within a GroupMemberProvider");
     }
     return context;
 };
@@ -64,9 +64,9 @@ export default function GroupMemberContextProvider({
                 </div>
 
             </div>
-            <GroupMemberContext value={contextValue}>
+            <GroupContext value={contextValue}>
                 {children}
-            </GroupMemberContext>
+            </GroupContext>
         </div>
     );
 }
