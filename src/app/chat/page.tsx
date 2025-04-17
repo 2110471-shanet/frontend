@@ -5,31 +5,9 @@ import ChatSelect from "@/components/chatpage/ChatSelect";
 import NavBar from "@/components/NavBar";
 import { useState, useEffect, createContext, useMemo, useContext } from "react";
 
-import type { ChatSelectionStateContextType, MessageType, MessagesContextType } from "@/types";
+import { ChatSelectionStateContext, MessagesContext } from "./pageContext";
 
-// ==================== context ====================
-
-const ChatSelectionStateContext = createContext<ChatSelectionStateContextType | undefined>(undefined);
-
-export function useChatSelectionState() {
-    const context = useContext(ChatSelectionStateContext);
-    if (!context) {
-        throw new Error("useChatSelectionState must be used in /chat.");
-    }
-    return context;
-};
-
-const MessagesContext = createContext<MessagesContextType | undefined>(undefined);
-
-export function useMessages() {
-    const context = useContext(MessagesContext);
-    if (!context) {
-        throw new Error("useMessages must be used in /chat.");
-    }
-    return context;
-}
-
-// ==================== component ====================
+import type { MessageType } from "@/types";
 
 export default function Chat() {
 

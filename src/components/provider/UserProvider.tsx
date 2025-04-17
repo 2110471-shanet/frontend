@@ -4,19 +4,19 @@ import { createContext, useMemo, useState, useContext, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { useGlobalLoading } from "./GlobalLoadingProvider";
 
-import type { UsernameContextType } from "@/types";
+import type { UserContextType } from "@/types";
 
-const UsernameContext = createContext<UsernameContextType | undefined>(undefined);
+const UserContext = createContext<UserContextType | undefined>(undefined);
 
-export function useUsername() {
-    const context = useContext(UsernameContext);
+export function useUser() {
+    const context = useContext(UserContext);
     if (!context) {
-        throw new Error("useUsername must be used within a UsernameProvider");
+        throw new Error("useUser must be used within a UsernameProvider");
     }
     return context;
 };
 
-export default function UsernameProvider({
+export default function UserProvider({
     children,
 }: {
     children: React.ReactNode,
@@ -24,13 +24,14 @@ export default function UsernameProvider({
     
     const {isLoading, setIsLoading} = useGlobalLoading();
     const [username, setUsername] = useState("loading");
+    const [userId, setUserId] = useState("");
 
-    const contextValue = useMemo(() => ({ username, setUsername }), [username]);
+    const contextValue = useMemo(() => ({ username, userId, setUsername, setUserId }), [username, userId]);
 
     const pathname = usePathname();
 
     useEffect(() => {
-        const skipPaths = ["/signin", "/signup", "/test-ui"];
+        const skipPaths = ["/signin", "/signup", "/test-ui", "/"];
         if (skipPaths.includes(pathname)) {
             return;
         }
@@ -46,8 +47,8 @@ export default function UsernameProvider({
     }, [])
 
     return (
-        <UsernameContext value={contextValue}>
+        <UserContext value={contextValue}>
             {children}
-        </UsernameContext>
+        </UserContext>
     );
 }

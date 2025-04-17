@@ -33,7 +33,6 @@ export default function SignUpPane({
 
     const [isLocalLoading, setIsLocalLoading] = useState(false);
 
-    const showIconUrl = (isPasswordShown) ? "/icons/visibility_on_black.png" : "/icons/visibility_off_black.png";
     const inputPasswordType = (isPasswordShown) ? "text" : "password";
 
     // dynamic texts and labels
@@ -91,6 +90,8 @@ export default function SignUpPane({
                 await new Promise((resolve) => {
                     setTimeout(resolve, 100);
                 });
+                console.log("huh!?")
+                setIsLocalLoading(false);
             } catch {
                 setErrorMessage("error happened");
                 setIsLocalLoading(false);
@@ -131,10 +132,15 @@ export default function SignUpPane({
                                 setErrorMessage("");
                             }
                         }} />
-                        <div className="absolute right-4 top-1/2 -translate-y-[50%] h-6 w-6 hover:cursor-pointer" onClick={(e) => {
+                        <div className={`absolute right-4 top-1/2 -translate-y-[50%] h-6 w-6 hover:cursor-pointer ${(isPasswordShown)? "hidden": ""}`} onClick={(e) => {
                             setIsPasswordShown(!isPasswordShown);
                         }}>
-                            <Image className="object-contain" src={showIconUrl} fill={true} alt="show password button" />
+                            <Image className="object-contain" src="/icons/visibility_off_black.png" fill={true} alt="show password button" />
+                        </div>
+                        <div className={`absolute right-4 top-1/2 -translate-y-[50%] h-6 w-6 hover:cursor-pointer ${(isPasswordShown)? "": "hidden"}`} onClick={(e) => {
+                            setIsPasswordShown(!isPasswordShown);
+                        }}>
+                            <Image className="object-contain" src="/icons/visibility_on_black.png" fill={true} alt="show password button" />
                         </div>
                     </label>
                     <span className="text-red-500 text-sm mt-3 ms-2">{errorMessage}</span>

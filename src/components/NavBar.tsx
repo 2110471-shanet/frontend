@@ -2,7 +2,7 @@
 
 import { KeyboardEvent, SyntheticEvent, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useUsername } from "@/components/provider/UsernameProvider";
+import { useUser } from "@/components/provider/UserProvider";
 import { useGlobalLoading } from "@/components/provider/GlobalLoadingProvider";
 
 import CreateOutlinedIcon from '@mui/icons-material/CreateOutlined';
@@ -26,7 +26,7 @@ export default function NavBar({
     setIsChatSelectionShown: Function,
 }) {
 
-    const { username, setUsername } = useUsername();
+    const { username, setUsername } = useUser();
     const { isLoading, setIsLoading } = useGlobalLoading();
     const [ isSettingUsername, setIsSettingUsername ] = useState(false);
 
