@@ -20,7 +20,7 @@ type UserContextType = {
 type MembersType = Array<string>;
 
 type GroupType = {
-    id: string,
+    _id: string,
     chatName: string,
     lastmessage: string,
     members: Array<UserType>,
@@ -39,10 +39,15 @@ type GroupContextType = {
 type ChatSelectionStateContextType = {
     chatSelectionState: string;
     setChatSelectionState: React.Dispatch<React.SetStateAction<string>>;
+    selectedChat: string;
+    setSelectedChat: React.Dispatch<React.SetStateAction<string>>;
 };
 
 type MessageType = {
-    sender: string;
+    sender: {
+        _id: string,
+        username: string,
+    };
     message: string;
 };
 

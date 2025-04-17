@@ -18,7 +18,7 @@ export default function ChatSelect({
     const userNodes = (
         users.map((userInfo, ind) => {
             return (
-                <User key={ind} username={userInfo.username} status={userInfo.status} numUnread={userInfo.unreadCount} onClickHandler={(e: SyntheticEvent<HTMLDivElement>) => {
+                <User key={ind} userId={userInfo._id} username={userInfo.username} status={userInfo.status} numUnread={userInfo.unreadCount} onClickHandler={(e: SyntheticEvent<HTMLDivElement>) => {
                     console.log(userInfo._id);
                 }} />
             );
@@ -29,7 +29,7 @@ export default function ChatSelect({
         groups.map((groupInfo, ind) => {
             return (
                 <Group key={ind} groupName={groupInfo.chatName} isJoined={false} onClickHandler={(e: SyntheticEvent<HTMLDivElement>) => {
-                    console.log(groupInfo.id);
+                    console.log(groupInfo._id);
                 }} />
             );
         })

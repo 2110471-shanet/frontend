@@ -7,25 +7,31 @@ import { SyntheticEvent } from 'react';
 
 // username, isOnline, other set staet function...
 export default function User({
+    userId,
     username,
     numUnread,
     status,
     onClickHandler
 }: {
+    userId: string,
     username: string,
     numUnread: number,
     status: string,
     onClickHandler: Function
 }) {
 
-    const { chatSelectionState, setChatSelectionState } = useChatSelectionState();
+    const { 
+        chatSelectionState, setChatSelectionState,
+        selectedChat, setSelectedChat,
+    } = useChatSelectionState();
 
     async function handleChatSelection(e: SyntheticEvent<HTMLDivElement>) {
         if (chatSelectionState !== "loading") {
             setChatSelectionState("loading");
-            await new Promise((resolve) => {
-                setTimeout(resolve, 500);
-            });
+            // await new Promise((resolve) => {
+            //     setTimeout(resolve, 500);
+            // });
+            setSelectedChat(userId) ;
             setChatSelectionState("ready");
         }
     }

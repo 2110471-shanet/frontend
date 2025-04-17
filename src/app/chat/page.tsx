@@ -20,15 +20,17 @@ export default function Chat() {
 
     // empty, loading, ready
     const [chatSelectionState, setChatSelectionState] = useState("empty");
+    const [selectedChat, setSelectedChat] = useState<string>('') ;
 
-    const chatSelectionStateContextValue = useMemo(() => ({chatSelectionState, setChatSelectionState}), [chatSelectionState]);
+    const chatSelectionStateContextValue = useMemo(() => ({
+        chatSelectionState, setChatSelectionState,
+        selectedChat, setSelectedChat,
+    }), [chatSelectionState]);
 
     // [{sender, message}]
     const [messages, setMessages] = useState<Array<MessageType>>([]);
     const [users, setUsers] = useState<Array<UserType>>([]) ;
     const [groups, setGroups] = useState<Array<GroupType>>([]) ;
-
-    const isFirstLoadSucceed = useRef(false) ;
 
     const messagesContextValue = useMemo(() => ({messages, setMessages}), [messages]);
 
@@ -45,6 +47,8 @@ export default function Chat() {
 
     const usersRef = useRef<Array<UserType>>([]) ;
     const groupsRef = useRef<Array<GroupType>>([]) ;
+    const messagesRef = useRef<Array<MessageType>>([]) ;
+    const selectedChatRef = useRef<string>('') ;
 
     const socket = getSocket() ;
 
@@ -75,8 +79,6 @@ export default function Chat() {
     async function fetchUsers() {
         const res = await customAxios.get('/api/users') ;
 
-        console.log(res.data) ;
-
         setUsers(res.data) ;
         usersRef.current = res.data ;
     }
@@ -84,18 +86,30 @@ export default function Chat() {
     async function fetchChatRooms() {
         const res = await customAxios.get('/api/chatrooms/all') ;
 
-        console.log(res.data) ;
-
         setGroups(res.data) ;
         groupsRef.current = res.data
     }
+
+    async function fetchMessages() {
+        const res = await customAxios.get(`/api/messages/directMessages/${selectedChat}`) ;
+
+        setMessages(res.data) ;
+        messagesRef.current = res.data ;
+    }
+
+    useEffect(() => {
+        if (selectedChat !== '') {
+            selectedChatRef.current = selectedChat ;
+            fetchMessages() ;
+        }
+    }, [selectedChat]);
 
     useEffect(() => {
         if (!socket.connected) {
             connectSocket() ;
 
             socket.on('connect', () => {
-                socket.emit('join-rooms', usersRef.current) ;
+                // socket.emit('join-rooms', usersRef.current) ;
                 socket.emit('join-rooms', groupsRef.current) ;
             });
 
@@ -130,6 +144,28 @@ export default function Chat() {
                 setGroups(updatedGroups) ;
                 groupsRef.current = updatedGroups ;
             });
+
+            socket.on('receive-direct-message', (message, sender) => {
+                if (sender._id !== selectedChatRef.current)
+                    return ;
+
+                const updatedMessages = [
+                    ...messagesRef.current, {
+                    message: message,
+                    sender: {
+                        _id: sender._id,
+                        username: sender.username,
+                    },
+                }];
+
+                setMessages(updatedMessages) ;
+                messagesRef.current = updatedMessages ;
+            })
+
+            socket.on('errors', (errorMessage: string) => {
+                console.log(errorMessage) ;
+            })
+    
         }
 
         return () => {
