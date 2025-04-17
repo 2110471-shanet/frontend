@@ -19,7 +19,7 @@ export default function ChatSelect({
         users.map((userInfo, ind) => {
             return (
                 <User key={ind} username={userInfo.username} status={userInfo.status} numUnread={userInfo.unreadCount} onClickHandler={(e: SyntheticEvent<HTMLDivElement>) => {
-                    console.log(userInfo.id);
+                    console.log(userInfo._id);
                 }} />
             );
         })

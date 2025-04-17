@@ -4,7 +4,7 @@ type GlobalLoadingContextType = {
 };
 
 type UserType = {
-    id: string,
+    _id: string,
     username: string,
     status: string,
     unreadCount: number,

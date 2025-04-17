@@ -97,7 +97,27 @@ export default function Chat() {
             socket.on('connect', () => {
                 socket.emit('join-rooms', usersRef.current) ;
                 socket.emit('join-rooms', groupsRef.current) ;
-            })
+            });
+
+            socket.on('active', (user, status) => {
+                if (!usersRef.current.find(u => (u._id === user._id))) {
+                    setUsers([
+                        ...usersRef.current,
+                        {
+                            ...user,
+                            unreadCount: 0,
+                        }
+                    ])
+
+                    return ;
+                }
+
+                const updatedUsers = usersRef.current.map(u =>
+                    u._id === user._id ? { ...u, status } : u
+                );
+
+                setUsers(updatedUsers);
+            });
         }
 
         return () => {
