@@ -3,10 +3,12 @@
 import ChatBox from "@/components/chatpage/ChatBox";
 import ChatSelect from "@/components/chatpage/ChatSelect";
 import NavBar from "@/components/NavBar";
-import { useState, useEffect, createContext, useMemo, useContext } from "react";
+import { useState, useEffect, createContext, useMemo, useContext, useRef } from "react";
 import { ChatSelectionStateContext, MessagesContext } from "./pageContext";
 
 import type { MessageType } from "@/types";
+import { useGlobalLoading } from "@/components/provider/GlobalLoadingProvider";
+import { getSocket } from "@/lib/socket";
 
 export default function Chat() {
 
@@ -21,12 +23,28 @@ export default function Chat() {
     const [messages, setMessages] = useState<Array<MessageType>>([]);
 
     // const { username, setUsername } = useUser();
+    const { isLoading, setIsLoading } = useGlobalLoading() ;
+
+    const isFirstLoadSucceed = useRef(false) ;
 
     const messagesContextValue = useMemo(() => ({messages, setMessages}), [messages]);
 
-    // useEffect(() => {
-    //     setUsername("hello") ;
-    // }, []);
+    const socket = getSocket() ;
+
+    useEffect(() => {
+        if (!isLoading) {
+            if (isFirstLoadSucceed.current) {
+                socket.connect() ;
+            }
+
+            isFirstLoadSucceed.current = true ;
+        }
+
+        return () => {
+            if (socket.connected)
+                socket.disconnect() ;
+        }
+    }, [isLoading, isFirstLoadSucceed]);
 
     return (
         <div className="h-screen flex flex-col flex-nowrap w-full relative">
