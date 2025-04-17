@@ -9,6 +9,8 @@ import Image from "next/image";
 import { League_Spartan } from "next/font/google";
 import { CircularProgress } from "@mui/material";
 
+import customAxios from "@/axios";
+
 const league_spartan = League_Spartan({
     subsets: ["latin"],
     weight: ["600", "700", "800", "900"],
@@ -47,16 +49,25 @@ export default function SignUpPane({
             setErrorMessage("password cannot be empty.");
         } else if (username.includes(" ")) {
             setErrorMessage("username cannot contain any space.");
-            // password containing empty will be checked by back end
         } else {
             setIsLocalLoading(true);
-            await new Promise((resolve) => {
-                setTimeout(resolve, 1000);
-            });
-            setErrorMessage("this username is already used.");
-            setIsLocalLoading(false);
+            console.log(process.env.NEXT_PUBLIC_SERVER_URL);
+
+            try {
+                const res = await customAxios.post("/auth/register", {
+                    username: username,
+                    password: password, 
+                });
+                router.push("/signin");
+                await new Promise((resolve) => {
+                    setTimeout(resolve, 100);
+                });
+                setIsLocalLoading(false);
+            } catch {
+                setErrorMessage("error happened");
+                setIsLocalLoading(false);
+            }
         }
-        // try
     }
 
     async function handleSignInButton(e: SyntheticEvent<HTMLButtonElement>) {
@@ -70,12 +81,20 @@ export default function SignUpPane({
             setErrorMessage("username cannot contain any space.");
             // password containing empty will be checked by back end
         } else {
-            setIsLocalLoading(true);
-            await new Promise((resolve) => {
-                setTimeout(resolve, 1000);
-            });
-            setErrorMessage("invalid username or password");
-            setIsLocalLoading(false);
+            try {
+                setIsLocalLoading(true);
+                const res = await customAxios.post("/auth/login", {
+                    username: username,
+                    password: password,
+                });
+                router.push("/chat");
+                await new Promise((resolve) => {
+                    setTimeout(resolve, 100);
+                });
+            } catch {
+                setErrorMessage("error happened");
+                setIsLocalLoading(false);
+            }
         }
     }
 
