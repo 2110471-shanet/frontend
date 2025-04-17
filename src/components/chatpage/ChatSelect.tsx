@@ -1,9 +1,18 @@
-import { SyntheticEvent } from "react";
+import { SyntheticEvent, useEffect } from "react";
 import ChangeNameMobile from "./ChangeNameMobile"
 import CreateGroup from "./CreateGroup";
 import Group from "./Group";
 import LinkGroup from "./LinkGroup";
 import User from "./User";
+import customAxios from "@/axios";
+import axios from "axios";
+
+type UserType = {
+    id: string,
+    username: string,
+    status: string,
+    numUnread: number,
+}
 
 export default function ChatSelect({
     isChatSelectionShown,
@@ -96,6 +105,22 @@ export default function ChatSelect({
             isJoined: false,
         }
     ];
+
+    // const res = await customAxios;
+
+    async function fetchUsers() {
+        try {
+            const res = await customAxios.get('/api/users') ;
+
+            console.log(res) ;
+        } catch (error) {
+            console.log(`error trying to fetch users: ${error}`)
+        }
+    }
+
+    useEffect(() => {
+        fetchUsers() ;
+    }, [])
 
     const userNodes = (
         mockUserInfo.map((userInfo, ind) => {

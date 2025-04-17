@@ -5,7 +5,7 @@ const backend_url = (process.env.NEXT_PUBLIC_BACKEND_URL as string) ?? "http://l
 
 export const getSocket = () => {
     if (!socket) 
-        socket = io(backend_url, { autoConnect: false, });
+        socket = io(backend_url, { autoConnect: false, withCredentials: true });
 
     return socket;
 };

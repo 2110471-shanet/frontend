@@ -3,8 +3,7 @@
 import { useGlobalLoading } from '@/components/provider/GlobalLoadingProvider';
 import { useUsername } from '@/components/provider/UsernameProvider';
 import { getSocket } from '@/lib/socket';
-import { useState, useEffect, useRef, RefObject, SyntheticEvent } from 'react' ;
-import { Socket } from 'socket.io-client';
+import { useState, useEffect, useRef, SyntheticEvent } from 'react' ;
 
 type UserType = {
     _id: string,
@@ -15,20 +14,22 @@ type UserType = {
 type ChatRoomType = {
     _id: string,
     chatName: string,
-    members: string[],
+    members: Array<string>,
     numMembers: number,
 }
 
 export default function TestSocket() {
     const socket = getSocket() ;
 
-    const [ userInfo, setUserInfo ] = useState<string>('') ;
     const [ message, setMessage ] = useState<string>('') ;
     const [ receivedMessage, setReceivedMessage ] = useState<string>('') ;
-    const [ userList, setUserList ] = useState<UserType[]>([]) ;
-    const [ usernames, setUsernames ] = useState<string[]>([]) ;
-    const [ chatrooms, setChatrooms ] = useState<ChatRoomType[]>([]) ;
+    const [ userList, setUserList ] = useState<Array<UserType>>([]) ;
+    const [ usernames, setUsernames ] = useState<Array<string>>([]) ;
+    const [ chatrooms, setChatrooms ] = useState<Array<ChatRoomType>>([]) ;
     const [ chatroom, setChatroom ] = useState<string>('') ;
+    const [ chatroomId, setChatroomId ] = useState<string>('') ;
+    const [ isTyping, setIsTyping ] = useState<boolean>(false) ;
+    const [ typer, setTyper ] = useState<string>('') ;
 
     const { username, setUsername } = useUsername() ;
     const { isLoading, setIsLoading } = useGlobalLoading() ;
@@ -37,9 +38,9 @@ export default function TestSocket() {
 
     function handleFetchUser() {
         socket.emit('user-disconnect') ;
-        socket.emit('update-user', username, (connectionInfo: string, userList: UserType[]) => {
+        // socket.disconnect() ;
+        socket.emit('update-user', username, (connectionInfo: string, userList: Array<UserType>) => {
             console.log(`username updated: ${username}`) ;
-            setUserInfo(connectionInfo) ;
             setUserList(userList) ;
         })
     }
@@ -63,18 +64,19 @@ export default function TestSocket() {
         socket.on('retrieve-chatrooms', (chatrooms: Array<ChatRoomType>) => {
             setChatrooms(chatrooms) ;
         });
-    
-        socket.on('active', (newUser: UserType) => {
-            setUserList([ ...userList, newUser ]) ;
-        });
-    
-        socket.on('user-connected', (userInfo: string) => {
-            setUserInfo(userInfo) ;
-        });
         
-        socket.on('receive-message', (message: string, ) => {
+        socket.on('receive-message', (message: string, sender: string) => {
             setReceivedMessage(message) ;
+            console.log(`message: ${message} from ${sender}`) ;
         });
+
+        socket.on('others-typing', (username: string, chatroomId: string) => {
+            
+        });
+
+        socket.on('errors', (errorMessage: string) => {
+            console.log(errorMessage) ;
+        })
 
         return () => {
             socket.disconnect() ;
@@ -134,6 +136,8 @@ export default function TestSocket() {
                     type="text"
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
+                    onFocus={(e) => socket.emit('typing', username, chatroom)}
+                    onBlur={(e) => socket.emit('stop-typing', username, chatroom)}
                     className="bg-white border border-gray-300 rounded p-4 w-128 whitespace-pre-wrap mb-5"
                 />
                 
