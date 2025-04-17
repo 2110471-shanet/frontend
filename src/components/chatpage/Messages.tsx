@@ -2,12 +2,6 @@ import Message from "./Message";
 
 const mockMessage = `Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam suscipit non magna nec porta. Integer risus elit, auctor eget massa sed, iaculis placerat augue. Nulla quis tellus et elit lobortis eleifend porttitor in diam. Duis sit amet tellus elementum, efficitur ligula tincidunt, rhoncus magna. Cras faucibus posuere elit vitae eleifend.
 
-
-
-
-
-
-
 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam suscipit non magna nec porta. Integer risus elit, auctor eget massa sed, iaculis placerat augue. Nulla quis tellus et elit lobortis eleifend porttitor in diam. Duis sit amet tellus elementum, efficitur ligula tincidunt, rhoncus magna. Cras faucibus posuere elit vitae eleifend.
 
 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam suscipit non magna nec porta. Integer risus elit, auctor eget massa sed, iaculis placerat augue. Nulla quis tellus et elit lobortis eleifend porttitor in diam. Duis sit amet tellus elementum, efficitur ligula tincidunt, rhoncus magna. Cras faucibus posuere elit vitae eleifend.`;
