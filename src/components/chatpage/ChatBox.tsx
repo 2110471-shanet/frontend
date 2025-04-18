@@ -23,22 +23,36 @@ export default function ChatBox() {
       }
     }, []);
 
+    // replace this to props or context
+    const username = "Jessica";
+    const groupName = "Bobby and friends";
+    const isSelectedDirectChat = false;
+
     if (chatSelectionState === "ready") {
         return (
-            <div className="h-full flex-1 flex flex-col relative" ref={containerRef}>
+            <div className="h-full flex-1 flex flex-col relative w-full" ref={containerRef}>
                 {
                     containerElement &&
                     <ToastContainer
                         containerId="special"
-                        autoClose={500}
+                        autoClose={1000}
                         position="top-right"
-                        className="!absolute !top-4 !right-4 z-50 !rounded-md"
+                        className="!absolute !top-4 !right-4 z-50 !rounded-md !truncate"
+                        toastClassName="!max-w-full !truncate rounded-md"
                         transition={Flip}
-                        theme="dark"
+                        theme="light"
                         closeOnClick={true}
-                        hideProgressBar={true}
                     />
                 }
+                <div className="max-w-full truncate flex justify-center">
+                    <span className="max-w-full truncate py-2 border-b-1 border-slate-200 text-xl px-4">
+                        {
+                            (isSelectedDirectChat)?
+                            "User: " + username:
+                            "Group: " + groupName
+                        }
+                    </span>
+                </div>
                 <Messages />
                 <TextInput />
             </div>
@@ -50,14 +64,13 @@ export default function ChatBox() {
                     containerElement &&
                     <ToastContainer
                         containerId="special"
-                        autoClose={500}
+                        autoClose={1000}
                         position="top-right"
                         className="!absolute !top-4 !right-4 z-50 !rounded-md !truncate"
                         toastClassName="!max-w-full !truncate rounded-md"
                         transition={Flip}
-                        theme="dark"
+                        theme="light"
                         closeOnClick={true}
-                        hideProgressBar={true}
                     />
                 }
                 <span className="text-xl">Select a chat to start the convo!</span>
@@ -70,13 +83,13 @@ export default function ChatBox() {
                     containerElement &&
                     <ToastContainer
                         containerId="special"
-                        autoClose={500}
+                        autoClose={1000}
                         position="top-right"
-                        className="!absolute !top-4 !right-4 z-50 !rounded-md"
+                        className="!absolute !top-4 !right-4 z-50 !rounded-md !truncate"
+                        toastClassName="!max-w-full !truncate rounded-md"
                         transition={Flip}
-                        theme="dark"
+                        theme="light"
                         closeOnClick={true}
-                        hideProgressBar={true}
                     />
                 }
                 <CircularProgress />
