@@ -1,5 +1,9 @@
 @import "tailwindcss";
 
+:root {
+  --toastify-color-dark: #1A4789;
+}
+
 /* :root {
   --background: #ffffff;
   --foreground: #171717;
