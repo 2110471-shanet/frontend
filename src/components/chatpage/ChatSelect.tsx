@@ -17,7 +17,7 @@ export default function ChatSelect({
     users: Array<UserType>,
     groups: Array<GroupType>,
 }) {
-    const { userId } = useUser() ;
+    const { userId, username } = useUser() ;
     const { 
         members, setMembers,
         groupName, setGroupName,
@@ -34,6 +34,9 @@ export default function ChatSelect({
 
     const userNodes = (
         users.map((userInfo, ind) => {
+            if (username === userInfo.username) {
+                return null;
+            }
             return (
                 <User key={ind} userId={userInfo._id} username={userInfo.username} status={userInfo.status} numUnread={userInfo.unreadCount} onClickHandler={(e: SyntheticEvent<HTMLDivElement>) => {
                     console.log(userInfo._id);
