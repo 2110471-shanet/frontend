@@ -13,8 +13,7 @@ export default function Messages() {
         if (containerRef.current) {
             containerRef.current.scrollTop = containerRef.current.scrollHeight;
         }
-    }, [messages]); // scroll when messages update
-
+    }, [messages]);
 
     const messageNodes = (
         messages.map((message, ind) => {

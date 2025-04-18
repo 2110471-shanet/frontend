@@ -33,11 +33,9 @@ export default function CreateGroup() {
                 setIsSettingName(false);
             } else {
                 setIsLoading(true);
-                // await new Promise((resolve) => {
-                //     setTimeout(resolve, 1000);
-                // });
 
                 socket.emit('create-room', inputValue) ;
+                setInputValue("");
 
                 setIsSettingName(false);
                 setIsLoading(false);

@@ -3,7 +3,7 @@
 import { useChatSelectionState, useMessages } from '@/app/chat/pageContext';
 import { getSocket } from '@/lib/socket';
 import SendRoundedIcon from '@mui/icons-material/SendRounded';
-import { useState } from 'react';
+import { KeyboardEvent, useState } from 'react';
 import { useUser } from '../provider/UserProvider';
 
 export default function TextInput() {
@@ -22,28 +22,47 @@ export default function TextInput() {
     }
 
     function sendGroupMessage() {
+        console.log(`${selectedChat}`);
         socket.emit('send-message', inputValue, selectedChat, async (message: string) => {
             console.log(message) ;
         });
     }
 
     function sendMessageHandler() {
+        if (inputValue.trim() === '') {
+            return ;
+        }
+
         if (isSelectedDirectChat) {
             sendDirectMessage();
         } else {
             sendGroupMessage();
         }
 
-        setMessages([
-            ...messages, {
-            message: inputValue,
-            sender: {
-                _id: userId,
-                username: username,
-            },
-        }]) ;
-
         setInputValue('') ;
+    }
+
+    function sendMessageHandlerShortcut(e: KeyboardEvent<HTMLTextAreaElement>) {
+        // called when "enter"
+        if (e.key === "Enter") {
+            if (e.shiftKey) {
+                return;
+            } else {
+                e.preventDefault();
+
+                if (inputValue.trim() === '') {
+                    return ;
+                }
+
+                if (isSelectedDirectChat) {
+                    sendDirectMessage();
+                } else {
+                    sendGroupMessage();
+                }
+        
+                setInputValue('') ;
+            }
+        }
     }
 
     return (
@@ -53,10 +72,9 @@ export default function TextInput() {
                 placeholder="Say something..." 
                 value={inputValue}
                 onChange={(e) => {
-                    if (!e.target.value.includes(" ")) {
-                        setInputValue(e.target.value) ;
-                    }
+                    setInputValue(e.target.value) ;
                 }}
+                onKeyDown={sendMessageHandlerShortcut}
             />
             <button 
                 className="absolute h-8 w-8 top-[50%] -translate-y-[60%] right-5 hover:cursor-pointer rounded-full flex justify-center items-center"

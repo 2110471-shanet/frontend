@@ -49,6 +49,7 @@ export default function Chat() {
         setIsShowingMember, setMembers, setGroupName 
     } = useGroup() ;
 
+    const isSocketConnectedRef = useRef<boolean>(false);
     const usersRef = useRef<Array<UserType>>([]) ;
     const groupsRef = useRef<Array<GroupType>>([]) ;
     const messagesRef = useRef<Array<MessageType>>([]) ;
@@ -69,8 +70,9 @@ export default function Chat() {
     }
 
     async function disconnectSocket() {
-        if (socket.connected)
+        if (socket.connected) {
             socket.disconnect() ;
+        }
     }
 
     async function fetchUser() {
@@ -98,11 +100,16 @@ export default function Chat() {
         const requestPath = `/api/messages/${(isSelectedDirectChat ? 'directMessages/' : '')}${selectedChat}` ;
         const res = await customAxios(requestPath) ;
 
-        console.log(requestPath) ;
-        console.log(res.data) ;
-
         setMessages(res.data) ;
         messagesRef.current = res.data ;
+    }
+
+    function cleanEvent() {
+        socket.off('room-created');
+        socket.off('receive-direct-message');
+        socket.off('receive-message');
+        socket.off('user-joined-chatroom');
+        socket.off('errors');
     }
 
     useEffect(() => {
@@ -113,82 +120,103 @@ export default function Chat() {
     }, [selectedChat]);
 
     useEffect(() => {
-        if (!socket.connected) {
-            connectSocket() ;
+        if (!isSocketConnectedRef.current) {
+            connectSocket();
+            isSocketConnectedRef.current = true;
+        }
 
-            socket.on('connect', () => {
-                // socket.emit('join-rooms', usersRef.current) ;
-                socket.emit('join-rooms', groupsRef.current) ;
+        return () => {
+            disconnectSocket();
+            isSocketConnectedRef.current = false;
+        }
+    }, []);
+
+    useEffect(() => {
+        if (isSocketConnectedRef.current) {
+            socket.on('connect', () => {    
+                socket.emit('join-rooms', groups) ;
             });
-
+            
             socket.on('active', (user, status) => {
-                if (!usersRef.current.find(u => (u._id === user._id))) {
+                if (!users.find(u => (u._id === user._id))) {
                     setUsers([
-                        ...usersRef.current,
-                        {
+                        ...users, {
                             ...user,
                             unreadCount: 0,
                         }
                     ])
-
+        
                     return ;
                 }
-
-                const updatedUsers = usersRef.current.map(u =>
+        
+                const updatedUsers = users.map(u =>
                     u._id === user._id ? { ...u, status } : u
                 );
-
+        
                 setUsers(updatedUsers);
-                usersRef.current = updatedUsers ;
+                // usersRef.current = updatedUsers ;
             });
+        }
+        
+        return () => {
+            socket.off('join-rooms');
+            socket.off('active');
+            cleanEvent();
+        }
+    }, [isSocketConnectedRef, users, groups]);
 
+    useEffect(() => {
+        if (isSocketConnectedRef.current) {
             socket.on('room-created', (room) => {
                 const updatedGroups = [
-                    ...groupsRef.current, {
+                    ...groups, {
                     ...room,
                     numunread: 0,
                 }];
 
+                console.log(room);
+                console.log(updatedGroups);
+            
                 setGroups(updatedGroups) ;
-                groupsRef.current = updatedGroups ;
             });
 
             socket.on('receive-direct-message', (message, sender) => {
-                if (sender._id !== selectedChatRef.current)
+                if (!(sender._id === selectedChat || sender._id === userId)) {
                     return ;
-
-                const updatedMessages = [
-                    ...messagesRef.current, {
-                    message: message,
-                    sender: {
-                        _id: sender._id,
-                        username: sender.username,
-                    },
-                }];
-
-                setMessages(updatedMessages) ;
-                messagesRef.current = updatedMessages ;
-            });
+                }
             
-            socket.on('receive-message', (message, sender, chatId) => {
-                if (chatId !== selectedChatRef.current)
-                    return ;
-
                 const updatedMessages = [
-                    ...messagesRef.current, {
+                    ...messages, {
                     message: message,
                     sender: {
                         _id: sender._id,
                         username: sender.username,
                     },
                 }];
-
+            
                 setMessages(updatedMessages) ;
-                messagesRef.current = updatedMessages ;
+            });
+
+            socket.on('receive-message', (message, sender, chatId) => {
+                if (!(chatId === selectedChat || chatId === sender._id)) {
+                    return ;
+                }
+            
+                const updatedMessages = [
+                    ...messages, {
+                    message: message,
+                    sender: {
+                        _id: sender._id,
+                        username: sender.username,
+                    },
+                }];
+            
+                setMessages(updatedMessages) ;
             });
 
             socket.on('user-joined-chatroom', (user, groupId) => {
-                const updatedGroups = groupsRef.current.map(group =>
+                console.log('user-join-chatroom');
+                const updatedGroups = groups.map(group =>
                     group._id === groupId ? { 
                         _id: group._id,
                         chatName: group.chatName,
@@ -205,7 +233,7 @@ export default function Chat() {
                     } : group
                 );
 
-                if (groupId === selectedChatRef.current) {
+                if (groupId === selectedChat) {
                     toast(<span className="max-w-full truncate">{user.username} just joined!</span>, {
                         containerId: "special",
                         autoClose: 1000,
@@ -216,19 +244,13 @@ export default function Chat() {
                 }
 
                 setGroups(updatedGroups) ;
-                groupsRef.current = updatedGroups;
             });
-
-            socket.on('errors', (errorMessage: string) => {
-                console.log(errorMessage) ;
-            });
-    
         }
 
         return () => {
-            disconnectSocket() ;
+            cleanEvent();
         }
-    }, []);
+    }, [users, groups, messages, selectedChat, username, userId]);
 
     return (
         <div className="h-screen flex flex-col flex-nowrap w-full relative">
