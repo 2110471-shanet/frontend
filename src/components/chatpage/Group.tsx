@@ -47,13 +47,11 @@ export default function Group({
     async function handleChatSelection(e: SyntheticEvent<HTMLDivElement>) {
         if (!isJoined) {
             showMembers() ;
-        } else {
-            if (chatSelectionState !== "loading") {
-                setChatSelectionState("loading");
-                setIsSelectedDirectChat(false);
-                setSelectedChat(group._id.toString()) ;
-                setChatSelectionState("ready");
-            }
+        } else if (chatSelectionState !== "loading") {
+            setChatSelectionState("loading");
+            setIsSelectedDirectChat(false);
+            setSelectedChat(group._id.toString()) ;
+            setChatSelectionState("ready");
         }
     }
 

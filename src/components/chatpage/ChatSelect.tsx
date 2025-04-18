@@ -5,6 +5,7 @@ import Group from "./Group";
 import LinkGroup from "./LinkGroup";
 import User from "./User";
 import { GroupType, UserType } from "@/types";
+import { useUser } from "../provider/UserProvider";
 
 export default function ChatSelect({
     isChatSelectionShown,
@@ -15,6 +16,16 @@ export default function ChatSelect({
     users: Array<UserType>,
     groups: Array<GroupType>,
 }) {
+    const { userId } = useUser() ;
+
+    function checkIsJoin(group: GroupType, ) {
+        const memberIds = group.members.map((member) => {
+            return member._id.toString();
+        })
+
+        return memberIds.includes(userId);
+    }
+
     const userNodes = (
         users.map((userInfo, ind) => {
             return (
