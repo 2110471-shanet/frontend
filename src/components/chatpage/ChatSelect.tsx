@@ -6,6 +6,7 @@ import LinkGroup from "./LinkGroup";
 import User from "./User";
 import { GroupType, UserType } from "@/types";
 import { useUser } from "../provider/UserProvider";
+import { useGroup } from "../provider/GroupProvider";
 
 export default function ChatSelect({
     isChatSelectionShown,
@@ -17,14 +18,19 @@ export default function ChatSelect({
     groups: Array<GroupType>,
 }) {
     const { userId } = useUser() ;
+    const { 
+        members, setMembers,
+        groupName, setGroupName,
+    } = useGroup();
 
-    function checkIsJoin(group: GroupType, ) {
-        const memberIds = group.members.map((member) => {
-            return member._id.toString();
-        })
+    const [activeGroupInd, setActiveGroupInd] = useState<number | null>(null);
 
-        return memberIds.includes(userId);
-    }
+    useEffect(() => {
+        if (activeGroupInd !== null && groups[activeGroupInd]) {
+            setMembers(groups[activeGroupInd].members);
+            setGroupName(groups[activeGroupInd].chatName);
+        }
+    }, [groups, activeGroupInd]);
 
     const userNodes = (
         users.map((userInfo, ind) => {
@@ -38,9 +44,14 @@ export default function ChatSelect({
 
     const groupNodes = (
         groups.map((groupInfo, ind) => {
+            const isJoinedDebug = groupInfo.members.map(member => member._id).includes(userId);
+            if (!isJoinedDebug){
+                console.log(groupInfo.chatName, isJoinedDebug);
+            }
+
             return (
-                <Group key={ind} group={groupInfo} onClickHandler={(e: SyntheticEvent<HTMLDivElement>) => {
-                    console.log(groupInfo._id);
+                <Group key={ind} group={groupInfo} isJoined={groupInfo.members.map(member => member._id).includes(userId)} onClickHandler={(e: SyntheticEvent<HTMLDivElement>) => {
+                    setActiveGroupInd(ind);
                 }} />
             );
         })

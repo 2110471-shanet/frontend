@@ -198,7 +198,7 @@ export default function Chat() {
             });
 
             socket.on('receive-message', (message, sender, chatId) => {
-                if (!(chatId === selectedChat || chatId === sender._id.toString())) {
+                if (!(chatId === selectedChat || chatId === sender._id)) {
                     return ;
                 }
             
@@ -233,7 +233,7 @@ export default function Chat() {
                     } : group
                 );
 
-                if (groupId === selectedChatRef.current) {
+                if (groupId === selectedChat) {
                     toast(<span className="max-w-full truncate">{user.username} just joined!</span>, {
                         containerId: "special",
                         autoClose: 1000,
@@ -242,7 +242,7 @@ export default function Chat() {
                         closeOnClick: true
                     });
                 }
-                
+
                 setGroups(updatedGroups) ;
             });
         }

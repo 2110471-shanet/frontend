@@ -10,11 +10,11 @@ import { useUser } from '../provider/UserProvider';
 
 export default function Group({
     group,
-    // isJoined,
+    isJoined,
     onClickHandler,
 }: {
     group: GroupType,
-    // isJoined: boolean,
+    isJoined: boolean,
     onClickHandler: Function
 }) {
     const { 
@@ -23,30 +23,18 @@ export default function Group({
         isSelectedDirectChat, setIsSelectedDirectChat,
     } = useChatSelectionState();
 
-    const {
-        isShowingMember, setIsShowingMember,
-        members, setMembers,
-        groupName, setGroupName,
-    } = useGroup();
-
-    const {
-        userId,
-    } = useUser() ;
-
-    const [isJoined, setIsJoined] = useState<boolean>(false) ;
+    const { isShowingMember, setIsShowingMember } = useGroup();
 
     const socket = getSocket() ;
 
     async function handleJoinGroup(e: SyntheticEvent<HTMLDivElement>) {
         console.log('join')
-        socket.emit('join-chatroom', group._id.toString(), (status: boolean) => {
-            setIsJoined(status)
-        }) ;
+        socket.emit('join-chatroom', group._id.toString()) ;
     }
 
     async function handleChatSelection(e: SyntheticEvent<HTMLDivElement>) {
         if (!isJoined) {
-            showMembers() ;
+            setIsShowingMember(!isShowingMember) ;
         } else if (chatSelectionState !== "loading") {
             setChatSelectionState("loading");
             setIsSelectedDirectChat(false);
@@ -54,20 +42,6 @@ export default function Group({
             setChatSelectionState("ready");
         }
     }
-
-    async function showMembers() {
-        setIsShowingMember(!isShowingMember) ;
-        setMembers(group.members) ;
-        setGroupName(group.chatName) ;
-    }
-
-    useEffect(() => {
-        const memberIds = group.members.map((member) => {
-            return member._id.toString()
-        })
-
-        setIsJoined(memberIds.includes(userId)) ;
-    }, []);
     
     return (
         <div className="w-full bg-white rounded-md outline outline-slate-200 duration-100 hover:outline-slate-400 hover:drop-shadow-sm h-20 shrink-0 flex items-center px-4 gap-2 hover:cursor-pointer" onClick={(e) => {
@@ -82,7 +56,8 @@ export default function Group({
                 className={`w-6 h-6 relative flex justify-center items-center bg-[#1A4789] rounded-full hover:cursor-pointer ${(isJoined)? "": "hidden"}`}
                 onClick={(e) => {
                     e.stopPropagation();
-                    showMembers();
+                    onClickHandler(e);
+                    setIsShowingMember(!isShowingMember) ;
                 }}
             >
                 <InfoOutlineRoundedIcon sx={{height: "60%", width: "60%", color: "white",}} />
