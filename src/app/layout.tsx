@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono, Noto_Sans_Thai } from "next/font/google";
 import "./globals.css";
 import GlobalLoadingProvider from "@/components/provider/GlobalLoadingProvider";
-import UsernameProvider from "@/components/provider/UsernameProvider";
-import GroupMemberContextProvider from "@/components/provider/GroupMemberProvider";
+import UsernameProvider from "@/components/provider/UserProvider";
+import GroupContextProvider from "@/components/provider/GroupProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -16,7 +16,7 @@ const geistMono = Geist_Mono({
 });
 
 const noto_sans_thai = Noto_Sans_Thai({
-  subsets: ["thai"]
+  subsets: ["thai"],
 });
 
 export const metadata: Metadata = {
@@ -36,9 +36,9 @@ export default function RootLayout({
       >
         <GlobalLoadingProvider>
           <UsernameProvider>
-            <GroupMemberContextProvider>
+            <GroupContextProvider>
               {children}
-            </GroupMemberContextProvider>
+            </GroupContextProvider>
           </UsernameProvider>
         </GlobalLoadingProvider>
       </body>

@@ -1,11 +1,11 @@
 "use client"
 
-import { useUsername } from "@/components/provider/UsernameProvider";
+import { useUser } from "@/components/provider/UserProvider";
 import { useGlobalLoading } from "@/components/provider/GlobalLoadingProvider";
 
 export default function TestUsernameContext() {
 
-    const {username, setUsername} = useUsername();
+    const {username, setUsername} = useUser();
     const {isLoading, setIsLoading} = useGlobalLoading();
 
     return (

@@ -2,7 +2,7 @@
 
 import { KeyboardEvent, SyntheticEvent, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useUsername } from "@/components/provider/UsernameProvider";
+import { useUser } from "@/components/provider/UserProvider";
 import { useGlobalLoading } from "@/components/provider/GlobalLoadingProvider";
 
 import CreateOutlinedIcon from '@mui/icons-material/CreateOutlined';
@@ -12,6 +12,8 @@ import Link from "next/link";
 
 import { League_Spartan } from "next/font/google";
 import Image from "next/image";
+
+import customAxios from "@/axios";
 
 const league_spartan = League_Spartan({
     subsets: ["latin"],
@@ -26,7 +28,7 @@ export default function NavBar({
     setIsChatSelectionShown: Function,
 }) {
 
-    const { username, setUsername } = useUsername();
+    const { username, setUsername } = useUser();
     const { isLoading, setIsLoading } = useGlobalLoading();
     const [ isSettingUsername, setIsSettingUsername ] = useState(false);
 
@@ -59,11 +61,17 @@ export default function NavBar({
     async function handleSignOut(e: SyntheticEvent<HTMLButtonElement>) {
         e.preventDefault();
         e.stopPropagation();
-        setIsLoading(true);
-        await new Promise((resolve) => {
-            setTimeout(resolve, 1000);
-        });
-        await router.push("/signin");
+        try {
+            setIsLoading(true);
+            const res = await customAxios.get("/auth/logout");
+            router.push("signin");
+            await new Promise((resolve) => {
+                setTimeout(resolve, 100);
+            });
+            setIsLoading(false);
+        } catch {
+            setIsLoading(false);
+        }
         setIsLoading(false);
     }
 

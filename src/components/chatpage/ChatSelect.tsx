@@ -1,117 +1,35 @@
-import { SyntheticEvent } from "react";
+import { SyntheticEvent, useEffect, useState } from "react";
 import ChangeNameMobile from "./ChangeNameMobile"
 import CreateGroup from "./CreateGroup";
 import Group from "./Group";
 import LinkGroup from "./LinkGroup";
 import User from "./User";
+import { GroupType, UserType } from "@/types";
 
 export default function ChatSelect({
     isChatSelectionShown,
+    users,
+    groups,
 }: {
     isChatSelectionShown: boolean,
+    users: Array<UserType>,
+    groups: Array<GroupType>,
 }) {
-
-    const mockUserInfo = [
-        {
-            id: "a",
-            username: "bobby1423",
-            status: "online",
-            numUnread: 2,
-        },
-        {
-            id: "b",
-            username: "chikenduke",
-            status: "offline",
-            numUnread: 3,
-        },
-        {
-            id: "c",
-            username: "mewinglord",
-            status: "online",
-            numUnread: 107,
-        },
-        {
-            id: "d",
-            username: "mockingking",
-            status: "offline",
-            numUnread: 7,
-        },
-        {
-            id: "e",
-            username: "skibidi",
-            status: "online",
-            numUnread: 0,
-        },
-        {
-            id: "f",
-            username: "bobby1423",
-            status: "online",
-            numUnread: 2,
-        },
-        {
-            id: "g",
-            username: "chikenduke",
-            status: "offline",
-            numUnread: 3,
-        },
-        {
-            id: "h",
-            username: "mewinglord",
-            status: "online",
-            numUnread: 20,
-        },
-        {
-            id: "i",
-            username: "mockingking",
-            status: "offline",
-            numUnread: 7,
-        },
-        {
-            id: "j",
-            username: "skibidi",
-            status: "online",
-            numUnread: 0,
-        },
-    ];
-
-    const mockGroupInfo = [
-        {
-            id: "groupId: a",
-            groupName: "Mewing Empire",
-            isJoined: true,
-        },
-        {
-            id: "groupId: b",
-            groupName: "Skibidi Toilet",
-            isJoined: false,
-        },
-        {
-            id: "groupId: c",
-            groupName: "Cat Can Talk",
-            isJoined: true,
-        },
-        {
-            id: "groupId: d",
-            groupName: "Shane Multiverse",
-            isJoined: false,
-        }
-    ];
-
     const userNodes = (
-        mockUserInfo.map((userInfo, ind) => {
+        users.map((userInfo, ind) => {
             return (
-                <User key={ind} username={userInfo.username} status={userInfo.status} numUnread={userInfo.numUnread} onClickHandler={(e: SyntheticEvent<HTMLDivElement>) => {
-                    console.log(userInfo.id);
+                <User key={ind} userId={userInfo._id} username={userInfo.username} status={userInfo.status} numUnread={userInfo.unreadCount} onClickHandler={(e: SyntheticEvent<HTMLDivElement>) => {
+                    console.log(userInfo._id);
                 }} />
             );
         })
     );
 
     const groupNodes = (
-        mockGroupInfo.map((groupInfo, ind) => {
+        groups.map((groupInfo, ind) => {
             return (
-                <Group key={ind} groupName={groupInfo.groupName} isJoined={groupInfo.isJoined} onClickHandler={(e: SyntheticEvent<HTMLDivElement>) => {
-                    console.log(groupInfo.id);
+                <Group key={ind} group={groupInfo} onClickHandler={(e: SyntheticEvent<HTMLDivElement>) => {
+                    console.log(groupInfo._id);
                 }} />
             );
         })

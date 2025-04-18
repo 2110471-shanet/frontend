@@ -2,30 +2,35 @@
 
 import Person2RoundedIcon from '@mui/icons-material/Person2Rounded';
 
-import { useChatSelectionState } from '@/app/chat/page';
+import { useChatSelectionState } from '@/app/chat/pageContext';
 import { SyntheticEvent } from 'react';
 
 // username, isOnline, other set staet function...
 export default function User({
+    userId,
     username,
     numUnread,
     status,
     onClickHandler
 }: {
+    userId: string,
     username: string,
     numUnread: number,
     status: string,
     onClickHandler: Function
 }) {
 
-    const { chatSelectionState, setChatSelectionState } = useChatSelectionState();
+    const { 
+        chatSelectionState, setChatSelectionState,
+        selectedChat, setSelectedChat,
+        isSelectedDirectChat, setIsSelectedDirectChat,
+    } = useChatSelectionState();
 
     async function handleChatSelection(e: SyntheticEvent<HTMLDivElement>) {
         if (chatSelectionState !== "loading") {
             setChatSelectionState("loading");
-            await new Promise((resolve) => {
-                setTimeout(resolve, 500);
-            });
+            setIsSelectedDirectChat(true) ;
+            setSelectedChat(userId) ;
             setChatSelectionState("ready");
         }
     }

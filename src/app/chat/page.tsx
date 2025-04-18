@@ -3,33 +3,16 @@
 import ChatBox from "@/components/chatpage/ChatBox";
 import ChatSelect from "@/components/chatpage/ChatSelect";
 import NavBar from "@/components/NavBar";
-import { useState, useEffect, createContext, useMemo, useContext } from "react";
+import { useState, useEffect, createContext, useMemo, useContext, useRef } from "react";
+import { ChatSelectionStateContext, MessagesContext } from "./pageContext";
 
-import type { ChatSelectionStateContextType, MessageType, MessagesContextType } from "@/types";
+import type { GroupType, MessageType, UserType } from "@/types";
+import { getSocket } from "@/lib/socket";
 
-// ==================== context ====================
-
-const ChatSelectionStateContext = createContext<ChatSelectionStateContextType | undefined>(undefined);
-
-export function useChatSelectionState() {
-    const context = useContext(ChatSelectionStateContext);
-    if (!context) {
-        throw new Error("useChatSelectionState must be used in /chat.");
-    }
-    return context;
-};
-
-const MessagesContext = createContext<MessagesContextType | undefined>(undefined);
-
-export function useMessages() {
-    const context = useContext(MessagesContext);
-    if (!context) {
-        throw new Error("useMessages must be used in /chat.");
-    }
-    return context;
-}
-
-// ==================== component ====================
+import { useGlobalLoading } from "@/components/provider/GlobalLoadingProvider";
+import { useUser } from "@/components/provider/UserProvider";
+import { useGroup } from "@/components/provider/GroupProvider";
+import customAxios from "@/axios";
 
 export default function Chat() {
 
@@ -37,13 +20,203 @@ export default function Chat() {
 
     // empty, loading, ready
     const [chatSelectionState, setChatSelectionState] = useState("empty");
+    const [selectedChat, setSelectedChat] = useState<string>('') ;
+    const [isSelectedDirectChat, setIsSelectedDirectChat] = useState<boolean>(false);
 
-    const chatSelectionStateContextValue = useMemo(() => ({chatSelectionState, setChatSelectionState}), [chatSelectionState]);
+    const chatSelectionStateContextValue = useMemo(() => ({
+        chatSelectionState, setChatSelectionState,
+        selectedChat, setSelectedChat,
+        isSelectedDirectChat, setIsSelectedDirectChat,
+    }), [chatSelectionState, selectedChat, isSelectedDirectChat]);
 
     // [{sender, message}]
     const [messages, setMessages] = useState<Array<MessageType>>([]);
+    const [users, setUsers] = useState<Array<UserType>>([]) ;
+    const [groups, setGroups] = useState<Array<GroupType>>([]) ;
 
     const messagesContextValue = useMemo(() => ({messages, setMessages}), [messages]);
+
+    const { isLoading, setIsLoading } = useGlobalLoading() ;
+    const { 
+        username, userId,
+        setUsername, setUserId,
+    } = useUser() ;
+
+    const { 
+        isShowingMember, members, groupName, 
+        setIsShowingMember, setMembers, setGroupName 
+    } = useGroup() ;
+
+    const usersRef = useRef<Array<UserType>>([]) ;
+    const groupsRef = useRef<Array<GroupType>>([]) ;
+    const messagesRef = useRef<Array<MessageType>>([]) ;
+    const selectedChatRef = useRef<string>('') ;
+
+    const socket = getSocket() ;
+
+    async function connectSocket() {
+        setIsLoading(true) ;
+
+        await fetchUser() ;
+        await fetchUsers() ;
+        await fetchChatRooms() ;
+
+        socket.connect() ;
+
+        setIsLoading(false) ;
+    }
+
+    async function disconnectSocket() {
+        if (socket.connected)
+            socket.disconnect() ;
+    }
+
+    async function fetchUser() {
+        const res = await customAxios.get('/api/user') ;
+
+        setUsername(res.data.user.username) ;
+        setUserId(res.data.user._id) ;
+    }
+
+    async function fetchUsers() {
+        const res = await customAxios.get('/api/users') ;
+
+        setUsers(res.data) ;
+        usersRef.current = res.data ;
+    }
+
+    async function fetchChatRooms() {
+        const res = await customAxios.get('/api/chatrooms/all') ;
+
+        setGroups(res.data) ;
+        groupsRef.current = res.data
+    }
+
+    async function fetchMessages() {
+        const requestPath = `/api/messages/${(isSelectedDirectChat ? 'directMessages/' : '')}${selectedChat}` ;
+        const res = await customAxios(requestPath) ;
+
+        console.log(requestPath) ;
+        console.log(res.data) ;
+
+        setMessages(res.data) ;
+        messagesRef.current = res.data ;
+    }
+
+    useEffect(() => {
+        if (selectedChat !== '') {
+            selectedChatRef.current = selectedChat ;
+            fetchMessages() ;
+        }
+    }, [selectedChat]);
+
+    useEffect(() => {
+        if (!socket.connected) {
+            connectSocket() ;
+
+            socket.on('connect', () => {
+                // socket.emit('join-rooms', usersRef.current) ;
+                socket.emit('join-rooms', groupsRef.current) ;
+            });
+
+            socket.on('active', (user, status) => {
+                if (!usersRef.current.find(u => (u._id === user._id))) {
+                    setUsers([
+                        ...usersRef.current,
+                        {
+                            ...user,
+                            unreadCount: 0,
+                        }
+                    ])
+
+                    return ;
+                }
+
+                const updatedUsers = usersRef.current.map(u =>
+                    u._id === user._id ? { ...u, status } : u
+                );
+
+                setUsers(updatedUsers);
+                usersRef.current = updatedUsers ;
+            });
+
+            socket.on('room-created', (room) => {
+                const updatedGroups = [
+                    ...groupsRef.current, {
+                    ...room,
+                    numunread: 0,
+                }];
+
+                setGroups(updatedGroups) ;
+                groupsRef.current = updatedGroups ;
+            });
+
+            socket.on('receive-direct-message', (message, sender) => {
+                if (sender._id !== selectedChatRef.current)
+                    return ;
+
+                const updatedMessages = [
+                    ...messagesRef.current, {
+                    message: message,
+                    sender: {
+                        _id: sender._id,
+                        username: sender.username,
+                    },
+                }];
+
+                setMessages(updatedMessages) ;
+                messagesRef.current = updatedMessages ;
+            });
+            
+            socket.on('receive-message', (message, sender, chatId) => {
+                if (chatId !== selectedChatRef.current)
+                    return ;
+
+                const updatedMessages = [
+                    ...messagesRef.current, {
+                    message: message,
+                    sender: {
+                        _id: sender._id,
+                        username: sender.username,
+                    },
+                }];
+
+                setMessages(updatedMessages) ;
+                messagesRef.current = updatedMessages ;
+            });
+
+            socket.on('user-joined-chatroom', (user, groupId) => {
+                const updatedGroups = groupsRef.current.map(group =>
+                    group._id === groupId ? { 
+                        _id: group._id,
+                        chatName: group.chatName,
+                        lastMessage: group.lastMessage,
+                        numUnread: group.numUnread,
+                        members: [
+                            ...group.members, {
+                                _id: user._id,
+                                username: user.username,
+                                status: user.status,
+                                unreadCount: 0,
+                            }
+                        ]
+                    } : group
+                );
+
+                setGroups(updatedGroups) ;
+                groupsRef.current = updatedGroups;
+            });
+
+            socket.on('errors', (errorMessage: string) => {
+                console.log(errorMessage) ;
+            });
+    
+        }
+
+        return () => {
+            disconnectSocket() ;
+        }
+    }, []);
 
     return (
         <div className="h-screen flex flex-col flex-nowrap w-full relative">
@@ -51,7 +224,11 @@ export default function Chat() {
             <main className="w-full flex flex-nowrap relative overflow-hidden flex-1 min-h-[300px]">
                 <MessagesContext value={messagesContextValue}>
                     <ChatSelectionStateContext value={chatSelectionStateContextValue}>
-                        <ChatSelect isChatSelectionShown={isChatSelectionShown} />
+                        <ChatSelect 
+                            isChatSelectionShown={isChatSelectionShown} 
+                            users={users}
+                            groups={groups}
+                        />
                         <ChatBox />
                     </ChatSelectionStateContext>
                 </MessagesContext>

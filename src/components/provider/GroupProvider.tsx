@@ -3,19 +3,19 @@
 import { createContext, useMemo, useState, useContext } from "react";
 import Person2RoundedIcon from '@mui/icons-material/Person2Rounded';
 
-import type { GroupMemberContextType, MembersType } from "@/types";
+import type { GroupContextType, MembersType, UserType } from "@/types";
 
-const GroupMemberContext = createContext<GroupMemberContextType | undefined>(undefined);
+const GroupContext = createContext<GroupContextType | undefined>(undefined);
 
-export function useGroupMember() {
-    const context = useContext(GroupMemberContext);
+export function useGroup() {
+    const context = useContext(GroupContext);
     if (!context) {
-        throw new Error("useGroupMember must be used within a GroupMemberProvider");
+        throw new Error("useGroup must be used within a GroupProvider");
     }
     return context;
 };
 
-export default function GroupMemberContextProvider({
+export default function GroupProvider({
     children,
 }: {
     children: React.ReactNode,
@@ -23,18 +23,21 @@ export default function GroupMemberContextProvider({
 
     const [isShowingMember, setIsShowingMember] = useState(false);
     const [groupName, setGroupName] = useState<string>("");
-    const [members, setMembers] = useState<MembersType>([]);
+    const [members, setMembers] = useState<Array<UserType>>([]);
 
-    const contextValue = useMemo(() => ({isShowingMember, groupName, members, setIsShowingMember, setGroupName, setMembers}), [isShowingMember, members]);
+    const contextValue = useMemo(() => ({
+        isShowingMember, groupName, members, 
+        setIsShowingMember, setGroupName, setMembers
+    }), [isShowingMember, members]);
 
     const memberNodes = (
         members.map((member, ind) => {
             return (
-                <div className="flex gap-2 w-full shrink-0" key={member+ind}>
+                <div className="flex gap-2 w-full shrink-0" key={member.username+ind}>
                     <div className="h-6 w-6 relative flex shrink-0 justify-center items-center bg-slate-600 rounded-md">
                         <Person2RoundedIcon sx={{height: "85%", width: "85%", color: "white",}} />
                     </div>
-                    <span key={member} className="flex-1 truncate">{member}</span>
+                    <span key={member.username} className="flex-1 truncate">{member.username}</span>
                 </div>
             );
         })
@@ -64,9 +67,9 @@ export default function GroupMemberContextProvider({
                 </div>
 
             </div>
-            <GroupMemberContext value={contextValue}>
+            <GroupContext value={contextValue}>
                 {children}
-            </GroupMemberContext>
+            </GroupContext>
         </div>
     );
 }
