@@ -14,6 +14,8 @@ import { useUser } from "@/components/provider/UserProvider";
 import { useGroup } from "@/components/provider/GroupProvider";
 import customAxios from "@/axios";
 
+import { toast } from "react-toastify";
+
 export default function Chat() {
 
     const [isChatSelectionShown, setIsChatSelectionShown] = useState(false);
@@ -202,6 +204,16 @@ export default function Chat() {
                         ]
                     } : group
                 );
+
+                if (groupId === selectedChatRef.current) {
+                    toast(<span className="max-w-full truncate">{user.username} just joined!</span>, {
+                        containerId: "special",
+                        autoClose: 1000,
+                        theme: "light",
+                        className: "max-w-56 md:max-w-64 !truncate mt-4 !min-[481px]:mt-0 md rounded-md overflow-hidden !me-4 !min-[481px]:me-0",
+                        closeOnClick: true
+                    });
+                }
 
                 setGroups(updatedGroups) ;
                 groupsRef.current = updatedGroups;
