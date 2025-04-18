@@ -53,7 +53,7 @@ export default function CreateGroup() {
             <div className={`overflow-hidden ${(isSettingName)? "hidden": ""}`}>
                 <AddCircleOutlineRoundedIcon className={`opacity-40 duration-100 group-hover:opacity-60`} sx={{height: "2rem", width: "2rem"}} />
             </div>
-            <label className={`${(isSettingName)? "": "hidden"}`}><input value={inputValue} className="px-4 py-2 outline outline-slate-300 rounded-sm focus:outline-slate-400 duration-100" type="text" placeholder="group name" onChange={(e) => {
+            <label className={`max-w-full ${(isSettingName)? "": "hidden"}`}><input value={inputValue} className="max-w-full px-4 py-2 outline outline-slate-300 rounded-sm focus:outline-slate-400 duration-100" type="text" placeholder="group name" onChange={(e) => {
                 setInputValue(e.target.value);
             }} onKeyDown={handleSettingUsername} /></label>
         </div>
