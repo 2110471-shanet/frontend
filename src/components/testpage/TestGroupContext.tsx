@@ -35,31 +35,31 @@ export default function TestGroupContext() {
 
     const [activeGroupIndex, setActiveGroupIndex] = useState<number | null>(null);
 
-    useEffect(() => {
-        if (activeGroupIndex !== null && mockGroups[activeGroupIndex]) {
-            setGroupName(mockGroups[activeGroupIndex].groupName);
-            setMembers(mockGroups[activeGroupIndex].members);
-        }
-    }, [activeGroupIndex, mockGroups]);
+    // useEffect(() => {
+    //     if (activeGroupIndex !== null && mockGroups[activeGroupIndex]) {
+    //         setGroupName(mockGroups[activeGroupIndex].groupName);
+    //         setMembers(mockGroups[activeGroupIndex].members);
+    //     }
+    // }, [activeGroupIndex, mockGroups]);
 
-    useEffect(() => {
-        let i = 0;
-        const myInterval = setInterval(() => {
-            if (i === 0) {
-                setMockGroups([{
-                    groupName: mockGroups[0].groupName,
-                    members: [...mockGroups[0].members, "JoggyJoe"]
-                 }, ...mockGroups.slice(1)]);
-                 i++;
-            } else {
-                setMockGroups(mockGroups);
-                i--;
-            }
-        }, 500);
-        return () => {
-            clearInterval(myInterval);
-        }
-    }, [])
+    // useEffect(() => {
+    //     let i = 0;
+    //     const myInterval = setInterval(() => {
+    //         if (i === 0) {
+    //             setMockGroups([{
+    //                 groupName: mockGroups[0].groupName,
+    //                 members: [...mockGroups[0].members, "JoggyJoe"]
+    //              }, ...mockGroups.slice(1)]);
+    //              i++;
+    //         } else {
+    //             setMockGroups(mockGroups);
+    //             i--;
+    //         }
+    //     }, 500);
+    //     return () => {
+    //         clearInterval(myInterval);
+    //     }
+    // }, [])
 
     return (
         <div className="flex gap-2">

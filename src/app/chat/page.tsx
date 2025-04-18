@@ -6,7 +6,7 @@ import NavBar from "@/components/NavBar";
 import { useState, useEffect, createContext, useMemo, useContext, useRef } from "react";
 import { ChatSelectionStateContext, MessagesContext } from "./pageContext";
 
-import { ChatSelectionStateContextType, type GroupType, type MessageType, type UserType } from "@/types";
+import type { GroupType, MessageType, UserType } from "@/types";
 import { getSocket } from "@/lib/socket";
 
 import { useGlobalLoading } from "@/components/provider/GlobalLoadingProvider";
