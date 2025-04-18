@@ -206,7 +206,7 @@ export default function Chat() {
                 );
 
                 if (groupId === selectedChatRef.current) {
-                    toast(<span className="max-w-full truncate">{user.username}</span>, {
+                    toast(<span className="max-w-full truncate">{user.username} just joined!</span>, {
                         containerId: "special",
                         hideProgressBar: true,
                         autoClose: 5000,
