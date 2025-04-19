@@ -1,10 +1,7 @@
 "use client"
 
 import { createContext, useMemo, useState, useContext, useEffect } from "react";
-import { usePathname } from "next/navigation";
-import { useGlobalLoading } from "./GlobalLoadingProvider";
 import type { UserContextType } from "@/types";
-import customAxios from "@/axios";
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
 

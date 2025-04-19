@@ -33,7 +33,7 @@ export default function Chat() {
 
     // [{sender, message}]
     const [messages, setMessages] = useState<Array<MessageType>>([]);
-    const [users, setUsers] = useState<Array<UserWithLastMessageType>>([]) ;
+    const [users, setUsers] = useState<Array<UserType>>([]) ;
     const [groups, setGroups] = useState<Array<GroupType>>([]) ;
 
     const messagesContextValue = useMemo(() => ({messages, setMessages}), [messages]);
@@ -45,7 +45,7 @@ export default function Chat() {
     } = useUser() ;
 
     const isSocketConnectedRef = useRef<boolean>(false);
-    const usersRef = useRef<Array<UserWithLastMessageType>>([]) ;
+    const usersRef = useRef<Array<UserType>>([]) ;
     const groupsRef = useRef<Array<GroupType>>([]) ;
     const messagesRef = useRef<Array<MessageType>>([]) ;
 
@@ -79,18 +79,14 @@ export default function Chat() {
     async function fetchUsers() {
         const res = await customAxios.get('/api/users') ;
 
-        // console.log(res.data);
-
         setUsers(res.data) ;
-        usersRef.current = res.data ;
     }
 
     async function fetchChatRooms() {
         const res = await customAxios.get('/api/chatrooms/all') ;
 
         setGroups(res.data) ;
-        groupsRef.current = res.data
-    }
+    }   
 
     async function fetchMessages() {
         try {
@@ -99,7 +95,6 @@ export default function Chat() {
     
             setMessages(res.data) ;
             setChatSelectionState("ready");
-            messagesRef.current = res.data ;
         } catch (error) {
             console.log(`error trying to: ${error}`);
             setChatSelectionState("ready");
@@ -133,7 +128,6 @@ export default function Chat() {
     }, []);
 
     useEffect(() => {
-        console.log(users);
         if (isSocketConnectedRef.current) {
             socket.on('connect', () => {    
                 socket.emit('join-rooms', groups) ;
@@ -156,7 +150,6 @@ export default function Chat() {
                 );
         
                 setUsers(updatedUsers);
-                // usersRef.current = updatedUsers ;
             });
         }
         
@@ -174,16 +167,22 @@ export default function Chat() {
                     ...room,
                     numunread: 0,
                 }];
-
-                console.log(room);
-                console.log(updatedGroups);
             
                 setGroups(updatedGroups) ;
             });
 
             socket.on('receive-direct-message', (message, sender) => {
-                if (!(sender._id === selectedChat || sender._id === userId)) {
-                    return ;
+                if (sender._id !== userId) {
+                    playSoundIncomingChat();
+                    if (sender._id !== selectedChat) {
+                        const updatedUsers = users.map(user =>
+                            user._id === sender._id ? { ...user, unreadCount: user.unreadCount + 1 } : user
+                        );
+    
+                        setUsers(updatedUsers);
+    
+                        return ;
+                    }
                 }
             
                 const updatedMessages = [
@@ -199,8 +198,17 @@ export default function Chat() {
             });
 
             socket.on('receive-message', (message, sender, chatId) => {
-                if (!(chatId === selectedChat || chatId === sender._id)) {
-                    return ;
+                if (chatId !== sender._id) {
+                    playSoundIncomingChat();
+                    if (chatId !== selectedChat && sender._id !== userId) {
+                        const updatedGroups = groups.map(group =>
+                            group._id === chatId ? { ...group, unreadCount: group.unreadCount + 1 } : group
+                        );
+    
+                        setGroups(updatedGroups);
+    
+                        return ;
+                    }
                 }
             
                 const updatedMessages = [
@@ -215,14 +223,43 @@ export default function Chat() {
                 setMessages(updatedMessages) ;
             });
 
+            socket.on('direct-message-read', (senderId: string) => {
+                const updatedUsers = users.map(user =>
+                    user._id === senderId ? { ...user, unreadCount: 0 } : user
+                );
+
+                setUsers(updatedUsers);
+            })
+
+            socket.on('message-read', (chatId: string) => {
+                const updatedGroups = groups.map(group =>
+                    group._id === chatId ? { ...group, unreadCount: 0 } : group
+                );
+
+                setGroups(updatedGroups);
+            })
+
+            socket.on('username-changed', (updatedUserId: string, newUsername: string) => {
+                if (updatedUserId === userId) {
+                    setUsername(newUsername);
+                    setUsers(users);    
+                    return;
+                }
+        
+                const updatedUsers = users.map(user =>
+                    user._id === updatedUserId ? { ...user, username: newUsername } : user
+                );
+        
+                setUsers(updatedUsers);
+            });
+
             socket.on('user-joined-chatroom', (user, groupId) => {
-                console.log('user-join-chatroom');
                 const updatedGroups = groups.map(group =>
                     group._id === groupId ? { 
                         _id: group._id,
                         chatName: group.chatName,
                         lastMessage: group.lastMessage,
-                        numUnread: group.numUnread,
+                        unreadCount: group.unreadCount,
                         members: [
                             ...group.members, {
                                 _id: user._id,
@@ -253,15 +290,41 @@ export default function Chat() {
             cleanEvent();
         }
     }, [users, groups, messages, selectedChat, username, userId]);
+    
+    const hasInteractedRef = useRef(false);
+
+    useEffect(() => {
+        const onFirstInteraction = () => {
+            hasInteractedRef.current = true;
+        };
+
+        window.addEventListener('click', onFirstInteraction, { once: true });
+        window.addEventListener('keydown', onFirstInteraction, { once: true });
+        window.addEventListener('touchstart', onFirstInteraction, { once: true });
+
+        return () => {
+            window.removeEventListener('click', onFirstInteraction);
+            window.removeEventListener('keydown', onFirstInteraction);
+            window.removeEventListener('touchstart', onFirstInteraction);
+        };
+    }, []);
 
     function playSoundIncomingChat() {
+        if (!hasInteractedRef.current) return; 
+
         const audio = new Audio("/audios/incomingChat.mp3");
-        audio.play();
+        audio.play().catch(err => {
+            console.warn("failed to play audio", err);
+        });
     }
 
     function playSoundUserJoin() {
+        if (!hasInteractedRef.current) return; 
+
         const audio = new Audio("/audios/UserJoin.mp3");
-        audio.play();
+        audio.play().catch(err => {
+            console.warn("failed to play audio", err);
+        });
     }
 
     return (

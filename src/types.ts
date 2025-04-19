@@ -30,7 +30,7 @@ type GroupType = {
     chatName: string,
     lastMessage: string,
     members: Array<UserType>,
-    numUnread: number,
+    unreadCount: number,
 }
 
 type GroupContextType = {

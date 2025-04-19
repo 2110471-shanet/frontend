@@ -8,6 +8,7 @@ import { GroupType, UserType, UserWithLastMessageType } from "@/types";
 import { useUser } from "../provider/UserProvider";
 import { useGroup } from "../provider/GroupProvider";
 import { useChatSelectionState } from "@/app/chat/pageContext";
+import { getSocket } from "@/lib/socket";
 
 export default function ChatSelect({
     isChatSelectionShown,
@@ -15,7 +16,7 @@ export default function ChatSelect({
     groups,
 }: {
     isChatSelectionShown: boolean,
-    users: Array<UserWithLastMessageType>,
+    users: Array<UserType>,
     groups: Array<GroupType>,
 }) {
     const { isSelectedDirectChat, setChatSelectionState } = useChatSelectionState();
@@ -27,6 +28,8 @@ export default function ChatSelect({
 
     const [activeGroupInd, setActiveGroupInd] = useState<number | null>(null);
     const [activeUserInd, setActiveUserInd] = useState<number | null>(null);
+
+    const socket = getSocket();
 
     useEffect(() => {
         if (activeGroupInd !== null && groups[activeGroupInd]) {
@@ -63,7 +66,7 @@ export default function ChatSelect({
                 return b.lastMessage.createdAt - a.lastMessage.createdAt;
             }
         }).map((userInfo, ind) => {
-            if (username === userInfo.username) {
+            if (userId === userInfo._id) {
                 return null;
             }
 
@@ -71,6 +74,7 @@ export default function ChatSelect({
                 <User key={ind} userId={userInfo._id} username={userInfo.username} status={userInfo.status} numUnread={userInfo.unreadCount} onClickHandler={(e: SyntheticEvent<HTMLDivElement>) => {
                     setChatSelectionState("loading");
                     setCurrentUsername(userInfo.username);
+                    socket.emit('read-direct-message', userId, userInfo._id); // receiver, sender
                 }} />
             );
         })
@@ -79,10 +83,13 @@ export default function ChatSelect({
     const groupNodes = (
         groups.map((groupInfo, ind) => {
             return (
-                <Group key={ind} group={groupInfo} isJoined={groupInfo.members.map(member => member._id).includes(userId)} onClickHandler={(e: SyntheticEvent<HTMLDivElement>) => {
-                    setChatSelectionState("loading");
-                    setActiveGroupInd(ind);
-                }} />
+                <Group key={ind} group={groupInfo} isJoined={groupInfo.members.map(member => member._id).includes(userId)}
+                    numUnread={groupInfo.unreadCount}
+                    onClickHandler={(e: SyntheticEvent<HTMLDivElement>) => {
+                        // setChatSelectionState("loading");
+                        setActiveGroupInd(ind);
+                        socket.emit('read-message', groupInfo._id);
+                    }} />
             );
         })
     );

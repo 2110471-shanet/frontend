@@ -60,7 +60,7 @@ export default function NavBar({
             } else {
                 setIsLoading(true);
 
-                // socket.emit('change-username', inputValue);
+                socket.emit('change-username', inputValue);
 
                 setInputValue("");
                 setIsLoading(false);
