@@ -10,11 +10,17 @@ type UserType = {
     unreadCount: number,
 }
 
+type UserWithLastMessageType = UserType & {
+    lastMessage?: MessageType,
+};
+
 type UserContextType = {
     username: string;
     userId: string;
+    currentUsername: string
     setUsername: React.Dispatch<React.SetStateAction<string>>;
     setUserId: React.Dispatch<React.SetStateAction<string>>;
+    setCurrentUsername: React.Dispatch<React.SetStateAction<string>>;
 };
 
 type MembersType = Array<string>;
@@ -51,6 +57,7 @@ type MessageType = {
         username: string,
     };
     message: string;
+    // createdAt: Date;
 };
 
 type MessagesContextType = {
@@ -59,5 +66,8 @@ type MessagesContextType = {
 };
 
 export type { 
-    GlobalLoadingContextType, UserContextType, MembersType, GroupContextType, ChatSelectionStateContextType, 
-    MessageType, MessagesContextType, UserType, GroupType };
+    GlobalLoadingContextType, UserContextType, MembersType, 
+    GroupContextType, ChatSelectionStateContextType, 
+    MessageType, MessagesContextType, UserType, GroupType,
+    UserWithLastMessageType,
+};

@@ -9,6 +9,8 @@ import { useChatSelectionState } from "@/app/chat/pageContext";
 import { useRef, useState, useEffect } from "react";
 
 import { ToastContainer, Flip } from "react-toastify";
+import { useGroup } from "../provider/GroupProvider";
+import { useUser } from "../provider/UserProvider";
 
 export default function ChatBox() {
 
@@ -16,6 +18,10 @@ export default function ChatBox() {
 
     const containerRef = useRef<HTMLDivElement>(null);
     const [containerElement, setContainerElement] = useState<HTMLElement | null>(null);
+
+    const { currentUsername } = useUser();
+    const { groupName } = useGroup();
+    const { isSelectedDirectChat } = useChatSelectionState();
   
     useEffect(() => {
       if (containerRef.current) {
@@ -23,10 +29,9 @@ export default function ChatBox() {
       }
     }, []);
 
-    // replace this to props or context
-    const username = "Jessica";
-    const groupName = "Bobby and friends";
-    const isSelectedDirectChat = false;
+    useEffect(() => {
+        console.log(currentUsername);
+    }, [chatSelectionState]);
 
     if (chatSelectionState === "ready") {
         return (
@@ -48,7 +53,7 @@ export default function ChatBox() {
                     <span className="max-w-full truncate py-2 border-b-1 border-slate-200 text-xl px-4">
                         {
                             (isSelectedDirectChat)?
-                            "User: " + username:
+                            "User: " + currentUsername:
                             "Group: " + groupName
                         }
                     </span>

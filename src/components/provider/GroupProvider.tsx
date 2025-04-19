@@ -28,7 +28,7 @@ export default function GroupProvider({
     const contextValue = useMemo(() => ({
         isShowingMember, groupName, members, 
         setIsShowingMember, setGroupName, setMembers
-    }), [isShowingMember, members]);
+    }), [isShowingMember, members, groupName]);
 
     const memberNodes = (
         members.map((member, ind) => {

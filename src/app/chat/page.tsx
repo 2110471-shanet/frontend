@@ -6,7 +6,7 @@ import NavBar from "@/components/NavBar";
 import { useState, useEffect, createContext, useMemo, useContext, useRef } from "react";
 import { ChatSelectionStateContext, MessagesContext } from "./pageContext";
 
-import type { GroupType, MessageType, UserType } from "@/types";
+import type { GroupType, MessageType, UserType, UserWithLastMessageType } from "@/types";
 import { getSocket } from "@/lib/socket";
 
 import { useGlobalLoading } from "@/components/provider/GlobalLoadingProvider";
@@ -33,27 +33,21 @@ export default function Chat() {
 
     // [{sender, message}]
     const [messages, setMessages] = useState<Array<MessageType>>([]);
-    const [users, setUsers] = useState<Array<UserType>>([]) ;
+    const [users, setUsers] = useState<Array<UserWithLastMessageType>>([]) ;
     const [groups, setGroups] = useState<Array<GroupType>>([]) ;
 
     const messagesContextValue = useMemo(() => ({messages, setMessages}), [messages]);
 
     const { isLoading, setIsLoading } = useGlobalLoading() ;
     const { 
-        username, userId,
-        setUsername, setUserId,
+        username, userId, currentUsername,
+        setUsername, setUserId, setCurrentUsername,
     } = useUser() ;
 
-    const { 
-        isShowingMember, members, groupName, 
-        setIsShowingMember, setMembers, setGroupName 
-    } = useGroup() ;
-
     const isSocketConnectedRef = useRef<boolean>(false);
-    const usersRef = useRef<Array<UserType>>([]) ;
+    const usersRef = useRef<Array<UserWithLastMessageType>>([]) ;
     const groupsRef = useRef<Array<GroupType>>([]) ;
     const messagesRef = useRef<Array<MessageType>>([]) ;
-    const selectedChatRef = useRef<string>('') ;
 
     const socket = getSocket() ;
 
@@ -85,6 +79,8 @@ export default function Chat() {
     async function fetchUsers() {
         const res = await customAxios.get('/api/users') ;
 
+        // console.log(res.data);
+
         setUsers(res.data) ;
         usersRef.current = res.data ;
     }
@@ -97,11 +93,17 @@ export default function Chat() {
     }
 
     async function fetchMessages() {
-        const requestPath = `/api/messages/${(isSelectedDirectChat ? 'directMessages/' : '')}${selectedChat}` ;
-        const res = await customAxios(requestPath) ;
-
-        setMessages(res.data) ;
-        messagesRef.current = res.data ;
+        try {
+            const requestPath = `/api/messages/${(isSelectedDirectChat ? 'directMessages/' : '')}${selectedChat}` ;
+            const res = await customAxios(requestPath) ;
+    
+            setMessages(res.data) ;
+            setChatSelectionState("ready");
+            messagesRef.current = res.data ;
+        } catch (error) {
+            console.log(`error trying to: ${error}`);
+            setChatSelectionState("ready");
+        }
     }
 
     function cleanEvent() {
@@ -114,7 +116,6 @@ export default function Chat() {
 
     useEffect(() => {
         if (selectedChat !== '') {
-            selectedChatRef.current = selectedChat ;
             fetchMessages() ;
         }
     }, [selectedChat]);
@@ -132,6 +133,7 @@ export default function Chat() {
     }, []);
 
     useEffect(() => {
+        console.log(users);
         if (isSocketConnectedRef.current) {
             socket.on('connect', () => {    
                 socket.emit('join-rooms', groups) ;
@@ -161,7 +163,6 @@ export default function Chat() {
         return () => {
             socket.off('join-rooms');
             socket.off('active');
-            cleanEvent();
         }
     }, [isSocketConnectedRef, users, groups]);
 

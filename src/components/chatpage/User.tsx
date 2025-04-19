@@ -4,6 +4,7 @@ import Person2RoundedIcon from '@mui/icons-material/Person2Rounded';
 
 import { useChatSelectionState } from '@/app/chat/pageContext';
 import { SyntheticEvent } from 'react';
+import { useUser } from '../provider/UserProvider';
 
 // username, isOnline, other set staet function...
 export default function User({
@@ -19,6 +20,7 @@ export default function User({
     status: string,
     onClickHandler: Function
 }) {
+    const { currentUsername } = useUser();
 
     const { 
         chatSelectionState, setChatSelectionState,
@@ -28,10 +30,12 @@ export default function User({
 
     async function handleChatSelection(e: SyntheticEvent<HTMLDivElement>) {
         if (chatSelectionState !== "loading") {
-            setChatSelectionState("loading");
+            // setChatSelectionState("loading");
             setIsSelectedDirectChat(true) ;
             setSelectedChat(userId) ;
-            setChatSelectionState("ready");
+            // console.log(currentUsername)
+            // setCurrentUsername(username);
+            // setChatSelectionState("ready");
         }
     }
     
