@@ -304,10 +304,12 @@ export default function Chat() {
         }
     }, [users, groups, messages, selectedChat, username, userId]);
     
-    const [hasInteracted, setHasInteracted] = useState(false);
+    const hasInteractedRef = useRef(false);
 
     useEffect(() => {
-        const onFirstInteraction = () => setHasInteracted(true);
+        const onFirstInteraction = () => {
+            hasInteractedRef.current = true;
+        };
 
         window.addEventListener('click', onFirstInteraction, { once: true });
         window.addEventListener('keydown', onFirstInteraction, { once: true });
@@ -321,7 +323,7 @@ export default function Chat() {
     }, []);
 
     function playSoundIncomingChat() {
-        if (!hasInteracted) return; 
+        if (!hasInteractedRef.current) return; 
 
         const audio = new Audio("/audios/incomingChat.mp3");
         audio.play().catch(err => {
@@ -330,7 +332,7 @@ export default function Chat() {
     }
 
     function playSoundUserJoin() {
-        if (!hasInteracted) return; 
+        if (!hasInteractedRef.current) return; 
 
         const audio = new Audio("/audios/UserJoin.mp3");
         audio.play().catch(err => {
