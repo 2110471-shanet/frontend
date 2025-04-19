@@ -80,28 +80,21 @@ export default function Chat() {
         const res = await customAxios.get('/api/users') ;
 
         setUsers(res.data) ;
-        usersRef.current = res.data ;
     }
 
     async function fetchChatRooms() {
         const res = await customAxios.get('/api/chatrooms/all') ;
 
-        // console.log(res.data);
-
         setGroups(res.data) ;
-        groupsRef.current = res.data
     }   
 
     async function fetchMessages() {
         try {
             const requestPath = `/api/messages/${(isSelectedDirectChat ? 'directMessages/' : '')}${selectedChat}` ;
             const res = await customAxios(requestPath) ;
-
-            console.log(res);
     
             setMessages(res.data) ;
             setChatSelectionState("ready");
-            messagesRef.current = res.data ;
         } catch (error) {
             console.log(`error trying to: ${error}`);
             setChatSelectionState("ready");
@@ -174,9 +167,6 @@ export default function Chat() {
                     ...room,
                     numunread: 0,
                 }];
-
-                console.log(room);
-                console.log(updatedGroups);
             
                 setGroups(updatedGroups) ;
             });
@@ -246,8 +236,6 @@ export default function Chat() {
                     group._id === chatId ? { ...group, unreadCount: 0 } : group
                 );
 
-                console.log('read-message');
-
                 setGroups(updatedGroups);
             })
 
@@ -266,7 +254,6 @@ export default function Chat() {
             });
 
             socket.on('user-joined-chatroom', (user, groupId) => {
-                console.log('user-join-chatroom');
                 const updatedGroups = groups.map(group =>
                     group._id === groupId ? { 
                         _id: group._id,
