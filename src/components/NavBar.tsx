@@ -1,6 +1,6 @@
 "use client"
 
-import { KeyboardEvent, SyntheticEvent, useState } from "react";
+import { KeyboardEvent, SyntheticEvent, useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useUser } from "@/components/provider/UserProvider";
 import { useGlobalLoading } from "@/components/provider/GlobalLoadingProvider";
@@ -37,6 +37,16 @@ export default function NavBar({
     const router = useRouter();
 
     const socket = getSocket();
+
+    const inputRef = useRef<HTMLInputElement>(null);
+
+    useEffect(() => {
+        if (isSettingUsername) {
+            if (inputRef.current) {
+                inputRef.current.focus();
+            }
+        }
+    }, [isSettingUsername]);
 
     async function handleSettingUsername(e: KeyboardEvent<HTMLInputElement>) {
         e.stopPropagation();
@@ -93,11 +103,14 @@ export default function NavBar({
                     <CreateOutlinedIcon sx={{width: "100%", height: "100%", objectFit: "contain"}} />
                 </div>
                 <span className={`me-6 px-4 py-2 bg-blue-100 outline-1 h-10 rounded-md ${(isSettingUsername) ? "hidden": ""}`}>{username}</span>
-                <input className={`px-4 py-2 outline-1 rounded-md me-4 hidden ${(isSettingUsername) ? "lg:block": "hidden"}`} type="text" value={inputValue} placeholder={username} onChange={(e) => {
+                <input ref={inputRef} className={`px-4 py-2 outline-1 rounded-md me-4 hidden ${(isSettingUsername) ? "lg:block": "hidden"}`} type="text" value={inputValue} placeholder={username} onChange={(e) => {
                     if (!e.target.value.includes(" ")) {
                         setInputValue(e.target.value);
                     }
-                }} onKeyDown={handleSettingUsername} />
+                }} onKeyDown={handleSettingUsername} onBlur={(e) => {
+                    setIsSettingUsername(false);
+                    setInputValue("");
+                }} />
                 <button className="hover:cursor-pointer hover:underline" onClick={handleSignOut}>Sign Out</button>
             </div>
         </nav>
