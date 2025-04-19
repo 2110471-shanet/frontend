@@ -15,7 +15,7 @@ export default function ChatSelect({
     groups,
 }: {
     isChatSelectionShown: boolean,
-    users: Array<UserWithLastMessageType>,
+    users: Array<UserType>,
     groups: Array<GroupType>,
 }) {
     const { isSelectedDirectChat, setChatSelectionState } = useChatSelectionState();
@@ -63,7 +63,7 @@ export default function ChatSelect({
                 return b.lastMessage.createdAt - a.lastMessage.createdAt;
             }
         }).map((userInfo, ind) => {
-            if (username === userInfo.username) {
+            if (userId === userInfo._id) {
                 return null;
             }
 

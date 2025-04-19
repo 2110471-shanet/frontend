@@ -33,7 +33,7 @@ export default function Chat() {
 
     // [{sender, message}]
     const [messages, setMessages] = useState<Array<MessageType>>([]);
-    const [users, setUsers] = useState<Array<UserWithLastMessageType>>([]) ;
+    const [users, setUsers] = useState<Array<UserType>>([]) ;
     const [groups, setGroups] = useState<Array<GroupType>>([]) ;
 
     const messagesContextValue = useMemo(() => ({messages, setMessages}), [messages]);
@@ -45,7 +45,7 @@ export default function Chat() {
     } = useUser() ;
 
     const isSocketConnectedRef = useRef<boolean>(false);
-    const usersRef = useRef<Array<UserWithLastMessageType>>([]) ;
+    const usersRef = useRef<Array<UserType>>([]) ;
     const groupsRef = useRef<Array<GroupType>>([]) ;
     const messagesRef = useRef<Array<MessageType>>([]) ;
 
@@ -156,7 +156,6 @@ export default function Chat() {
                 );
         
                 setUsers(updatedUsers);
-                // usersRef.current = updatedUsers ;
             });
         }
         
@@ -213,6 +212,20 @@ export default function Chat() {
                 }];
             
                 setMessages(updatedMessages) ;
+            });
+
+            socket.on('username-changed', (updatedUserId: string, newUsername: string) => {
+                if (updatedUserId === userId) {
+                    setUsername(newUsername);
+                    setUsers(users);    
+                    return;
+                }
+        
+                const updatedUsers = users.map(user =>
+                    user._id === updatedUserId ? { ...user, username: newUsername } : user
+                );
+        
+                setUsers(updatedUsers);
             });
 
             socket.on('user-joined-chatroom', (user, groupId) => {
