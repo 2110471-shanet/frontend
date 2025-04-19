@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const baseUrl = process.env.NEXT_PUBLIC_SERVER_URL ?? "http://localhost:5000";
+const baseUrl = process.env.NEXT_PUBLIC_SERVER_URL ?? "http://localhost:8080";
 
 const customAxios = axios.create({
     baseURL: baseUrl,
