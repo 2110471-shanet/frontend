@@ -242,6 +242,7 @@ export default function Chat() {
                         className: "max-w-56 md:max-w-64 !truncate mt-4 !min-[481px]:mt-0 md rounded-md overflow-hidden !me-4 !min-[481px]:me-0",
                         closeOnClick: true
                     });
+                    playSoundUserJoin();
                 }
 
                 setGroups(updatedGroups) ;
@@ -252,6 +253,16 @@ export default function Chat() {
             cleanEvent();
         }
     }, [users, groups, messages, selectedChat, username, userId]);
+
+    function playSoundIncomingChat() {
+        const audio = new Audio("/audios/incomingChat.mp3");
+        audio.play();
+    }
+
+    function playSoundUserJoin() {
+        const audio = new Audio("/audios/UserJoin.mp3");
+        audio.play();
+    }
 
     return (
         <div className="h-screen flex flex-col flex-nowrap w-full relative">
