@@ -35,6 +35,7 @@ export default function Chat() {
     const [messages, setMessages] = useState<Array<MessageType>>([]);
     const [users, setUsers] = useState<Array<UserType>>([]) ;
     const [groups, setGroups] = useState<Array<GroupType>>([]) ;
+    const [lastDirectMessages, setLastDirectMessages] = useState<Array<MessageType | null>>([]);
 
     const messagesContextValue = useMemo(() => ({messages, setMessages}), [messages]);
 
@@ -79,7 +80,23 @@ export default function Chat() {
     async function fetchUsers() {
         const res = await customAxios.get('/api/users') ;
 
-        setUsers(res.data) ;
+        const reducedLastDirectMessages = res.data.lastDirectMessages.map((lastDirectMessage: any) => {
+            return lastDirectMessage ? {
+                message: lastDirectMessage.message,
+                createdAt: lastDirectMessage.createdAt,
+                sender: {
+                    _id: lastDirectMessage.senderId,
+                    username: '',
+                },
+                receiver: {
+                    _id: lastDirectMessage.receiverId,
+                    username: '',
+                },
+            } : null;
+        });
+
+        setLastDirectMessages(reducedLastDirectMessages);
+        setUsers(res.data.users);
     }
 
     async function fetchChatRooms() {
@@ -175,10 +192,25 @@ export default function Chat() {
                 if (sender._id !== userId) {
                     playSoundIncomingChat();
                     if (sender._id !== selectedChat) {
-                        const updatedUsers = users.map(user =>
-                            user._id === sender._id ? { ...user, unreadCount: user.unreadCount + 1 } : user
-                        );
+                        const updatedUsers = users.map(user => {
+                            console.log(user.unreadCount);
+                            return user._id === sender._id ? { 
+                                ...user, 
+                                unreadCount: user.unreadCount + 1,
+                            } : user
+                        });
+
+                        const updatedLastDirectMessagesInd = users.findIndex(user => user._id === message.senderId)
+
+                        const updatedLastDirectMessages = lastDirectMessages.map((lastDirectMessage, ind) => {
+                            return lastDirectMessage ? (ind === updatedLastDirectMessagesInd ? {
+                                ...lastDirectMessage,
+                                message: message.message,
+                                createdAt: message.createdAt,
+                            } : lastDirectMessage) : null
+                        });
     
+                        setLastDirectMessages(updatedLastDirectMessages);
                         setUsers(updatedUsers);
     
                         return ;
@@ -187,14 +219,30 @@ export default function Chat() {
             
                 const updatedMessages = [
                     ...messages, {
-                    message: message,
+                    message: message.message,
+                    createdAt: message.createdAt,
                     sender: {
                         _id: sender._id,
                         username: sender.username,
                     },
+                    receiver: {
+                        _id: userId,
+                        username: username,
+                    }
                 }];
+
+                const updatedLastDirectMessagesInd = users.findIndex(user => user._id === message.receiverId)
+
+                const updatedLastDirectMessages = lastDirectMessages.map((lastDirectMessage, ind) => {
+                    return lastDirectMessage ? (ind === updatedLastDirectMessagesInd ? {
+                        ...lastDirectMessage,
+                        message: message.message,
+                        createdAt: message.createdAt,
+                    } : lastDirectMessage) : null
+                });
             
                 setMessages(updatedMessages) ;
+                setLastDirectMessages(updatedLastDirectMessages);
             });
 
             socket.on('receive-message', (message, sender, chatId) => {
@@ -202,7 +250,10 @@ export default function Chat() {
                     playSoundIncomingChat();
                     if (chatId !== selectedChat && sender._id !== userId) {
                         const updatedGroups = groups.map(group =>
-                            group._id === chatId ? { ...group, unreadCount: group.unreadCount + 1 } : group
+                            group._id === chatId ? { 
+                                ...group, 
+                                unreadCount: group.unreadCount + 1 
+                            } : group
                         );
     
                         setGroups(updatedGroups);
@@ -213,11 +264,16 @@ export default function Chat() {
             
                 const updatedMessages = [
                     ...messages, {
-                    message: message,
+                    message: message.message,
+                    createdAt: message.createdAt,
                     sender: {
                         _id: sender._id,
                         username: sender.username,
                     },
+                    receiver: {
+                        _id: chatId,
+                        username: '',
+                    }
                 }];
             
                 setMessages(updatedMessages) ;
@@ -337,6 +393,7 @@ export default function Chat() {
                             isChatSelectionShown={isChatSelectionShown} 
                             users={users}
                             groups={groups}
+                            lastDirectMessages={lastDirectMessages}
                         />
                         <ChatBox />
                     </ChatSelectionStateContext>

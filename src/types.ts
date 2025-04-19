@@ -56,8 +56,12 @@ type MessageType = {
         _id: string,
         username: string,
     };
+    receiver: {
+        _id: string,
+        username: string,
+    }
     message: string;
-    // createdAt: Date;
+    createdAt: Date;
 };
 
 type MessagesContextType = {
