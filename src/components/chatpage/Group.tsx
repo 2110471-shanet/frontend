@@ -36,10 +36,8 @@ export default function Group({
         if (!isJoined) {
             setIsShowingMember(!isShowingMember) ;
         } else if (chatSelectionState !== "loading") {
-            setChatSelectionState("loading");
             setIsSelectedDirectChat(false);
             setSelectedChat(group._id.toString()) ;
-            setChatSelectionState("ready");
         }
     }
     

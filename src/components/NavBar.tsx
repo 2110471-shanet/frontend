@@ -14,6 +14,7 @@ import { League_Spartan } from "next/font/google";
 import Image from "next/image";
 
 import customAxios from "@/axios";
+import { getSocket } from "@/lib/socket";
 
 const league_spartan = League_Spartan({
     subsets: ["latin"],
@@ -27,7 +28,6 @@ export default function NavBar({
     isChatSelectionShown: boolean,
     setIsChatSelectionShown: Function,
 }) {
-
     const { username, setUsername } = useUser();
     const { isLoading, setIsLoading } = useGlobalLoading();
     const [ isSettingUsername, setIsSettingUsername ] = useState(false);
@@ -35,6 +35,8 @@ export default function NavBar({
     const [ inputValue, setInputValue ] = useState("");
 
     const router = useRouter();
+
+    const socket = getSocket();
 
     async function handleSettingUsername(e: KeyboardEvent<HTMLInputElement>) {
         e.stopPropagation();
@@ -47,10 +49,9 @@ export default function NavBar({
                 setInputValue("");
             } else {
                 setIsLoading(true);
-                await new Promise((resolve) => {
-                    setTimeout(resolve, 500);
-                });
-                setUsername(inputValue);
+
+                // socket.emit('change-username', inputValue);
+
                 setInputValue("");
                 setIsLoading(false);
                 setIsSettingUsername(false);

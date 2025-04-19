@@ -22,14 +22,14 @@ export default function UserProvider({
     children: React.ReactNode,
 }) {
     
-    const {isLoading, setIsLoading} = useGlobalLoading();
     const [username, setUsername] = useState("loading");
     const [userId, setUserId] = useState("");
+    const [currentUsername, setCurrentUsername] = useState<string>("");
 
     const contextValue = useMemo(() => ({ 
-        username, userId,
-        setUsername, setUserId,
-    }), [username, userId]);
+        username, userId, currentUsername,
+        setUsername, setUserId, setCurrentUsername,
+    }), [username, userId, currentUsername]);
 
     return (
         <UserContext value={contextValue}>
