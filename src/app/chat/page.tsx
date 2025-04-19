@@ -79,8 +79,6 @@ export default function Chat() {
     async function fetchUsers() {
         const res = await customAxios.get('/api/users') ;
 
-        // console.log(res.data);
-
         setUsers(res.data) ;
         usersRef.current = res.data ;
     }
@@ -88,14 +86,18 @@ export default function Chat() {
     async function fetchChatRooms() {
         const res = await customAxios.get('/api/chatrooms/all') ;
 
+        // console.log(res.data);
+
         setGroups(res.data) ;
         groupsRef.current = res.data
-    }
+    }   
 
     async function fetchMessages() {
         try {
             const requestPath = `/api/messages/${(isSelectedDirectChat ? 'directMessages/' : '')}${selectedChat}` ;
             const res = await customAxios(requestPath) ;
+
+            console.log(res);
     
             setMessages(res.data) ;
             setChatSelectionState("ready");
@@ -133,7 +135,6 @@ export default function Chat() {
     }, []);
 
     useEffect(() => {
-        console.log(users);
         if (isSocketConnectedRef.current) {
             socket.on('connect', () => {    
                 socket.emit('join-rooms', groups) ;
@@ -181,8 +182,17 @@ export default function Chat() {
             });
 
             socket.on('receive-direct-message', (message, sender) => {
-                if (!(sender._id === selectedChat || sender._id === userId)) {
-                    return ;
+                if (sender._id !== userId) {
+                    playSoundIncomingChat();
+                    if (sender._id !== selectedChat) {
+                        const updatedUsers = users.map(user =>
+                            user._id === sender._id ? { ...user, unreadCount: user.unreadCount + 1 } : user
+                        );
+    
+                        setUsers(updatedUsers);
+    
+                        return ;
+                    }
                 }
             
                 const updatedMessages = [
@@ -198,8 +208,17 @@ export default function Chat() {
             });
 
             socket.on('receive-message', (message, sender, chatId) => {
-                if (!(chatId === selectedChat || chatId === sender._id)) {
-                    return ;
+                if (chatId !== sender._id) {
+                    playSoundIncomingChat();
+                    if (chatId !== selectedChat && sender._id !== userId) {
+                        const updatedGroups = groups.map(group =>
+                            group._id === chatId ? { ...group, unreadCount: group.unreadCount + 1 } : group
+                        );
+    
+                        setGroups(updatedGroups);
+    
+                        return ;
+                    }
                 }
             
                 const updatedMessages = [
@@ -213,6 +232,24 @@ export default function Chat() {
             
                 setMessages(updatedMessages) ;
             });
+
+            socket.on('direct-message-read', (senderId: string) => {
+                const updatedUsers = users.map(user =>
+                    user._id === senderId ? { ...user, unreadCount: 0 } : user
+                );
+
+                setUsers(updatedUsers);
+            })
+
+            socket.on('message-read', (chatId: string) => {
+                const updatedGroups = groups.map(group =>
+                    group._id === chatId ? { ...group, unreadCount: 0 } : group
+                );
+
+                console.log('read-message');
+
+                setGroups(updatedGroups);
+            })
 
             socket.on('username-changed', (updatedUserId: string, newUsername: string) => {
                 if (updatedUserId === userId) {
@@ -235,7 +272,7 @@ export default function Chat() {
                         _id: group._id,
                         chatName: group.chatName,
                         lastMessage: group.lastMessage,
-                        numUnread: group.numUnread,
+                        unreadCount: group.unreadCount,
                         members: [
                             ...group.members, {
                                 _id: user._id,
@@ -266,15 +303,39 @@ export default function Chat() {
             cleanEvent();
         }
     }, [users, groups, messages, selectedChat, username, userId]);
+    
+    const [hasInteracted, setHasInteracted] = useState(false);
+
+    useEffect(() => {
+        const onFirstInteraction = () => setHasInteracted(true);
+
+        window.addEventListener('click', onFirstInteraction, { once: true });
+        window.addEventListener('keydown', onFirstInteraction, { once: true });
+        window.addEventListener('touchstart', onFirstInteraction, { once: true });
+
+        return () => {
+            window.removeEventListener('click', onFirstInteraction);
+            window.removeEventListener('keydown', onFirstInteraction);
+            window.removeEventListener('touchstart', onFirstInteraction);
+        };
+    }, []);
 
     function playSoundIncomingChat() {
+        if (!hasInteracted) return; 
+
         const audio = new Audio("/audios/incomingChat.mp3");
-        audio.play();
+        audio.play().catch(err => {
+            console.warn("failed to play audio", err);
+        });
     }
 
     function playSoundUserJoin() {
+        if (!hasInteracted) return; 
+
         const audio = new Audio("/audios/UserJoin.mp3");
-        audio.play();
+        audio.play().catch(err => {
+            console.warn("failed to play audio", err);
+        });
     }
 
     return (
