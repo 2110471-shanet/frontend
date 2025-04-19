@@ -29,7 +29,6 @@ export default function Group({
     const socket = getSocket() ;
 
     async function handleJoinGroup(e: SyntheticEvent<HTMLDivElement>) {
-        console.log('join')
         socket.emit('join-chatroom', group._id.toString()) ;
     }
 

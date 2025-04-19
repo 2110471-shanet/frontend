@@ -33,16 +33,10 @@ export default function User({
 
     async function handleChatSelection(e: SyntheticEvent<HTMLDivElement>) {
         if (chatSelectionState !== "loading") {
-            // setChatSelectionState("loading");
             setIsSelectedDirectChat(true) ;
             setSelectedChat(userId) ;
-            // console.log(currentUsername)
-            // setCurrentUsername(username);
-            // setChatSelectionState("ready");
         }
     }
-
-    // const lastMesssage = "Did you see my message boi?";
     
     return (
         <div className={`w-full bg-white rounded-md outline outline-slate-200 duration-100 hover:outline-slate-400 hover:drop-shadow-sm h-20 shrink-0 flex items-center px-4 gap-2 hover:cursor-pointer ${(status==="online")? "": "opacity-50"}`} onClick={(e) => {

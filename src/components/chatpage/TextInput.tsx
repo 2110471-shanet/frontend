@@ -22,7 +22,6 @@ export default function TextInput() {
     }
 
     function sendGroupMessage() {
-        console.log(`${selectedChat}`);
         socket.emit('send-message', inputValue, selectedChat, async (message: string) => {
             console.log(message) ;
         });

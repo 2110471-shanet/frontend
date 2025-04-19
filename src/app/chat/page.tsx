@@ -83,25 +83,20 @@ export default function Chat() {
         const reducedLastDirectMessages = res.data.lastDirectMessages.map((lastDirectMessage: any) => {
             return lastDirectMessage ? {
                 message: lastDirectMessage.message,
+                createdAt: lastDirectMessage.createdAt,
                 sender: {
                     _id: lastDirectMessage.senderId,
                     username: '',
-                }
+                },
+                receiver: {
+                    _id: lastDirectMessage.receiverId,
+                    username: '',
+                },
             } : null;
         });
 
-        setUsers(res.data.users);
         setLastDirectMessages(reducedLastDirectMessages);
-
-        // console.log(res.data.lastDirectMessages.map((lastDirectMessage: any) => {
-        //     return lastDirectMessage ? {
-        //         message: lastDirectMessage.message,
-        //         sender: {
-        //             _id: lastDirectMessage.senderId,
-        //             username: '',
-        //         }
-        //     } : null;
-        // }));
+        setUsers(res.data.users);
     }
 
     async function fetchChatRooms() {
@@ -198,21 +193,25 @@ export default function Chat() {
                     playSoundIncomingChat();
                     if (sender._id !== selectedChat) {
                         const updatedUsers = users.map(user => {
+                            console.log(user.unreadCount);
                             return user._id === sender._id ? { 
                                 ...user, 
                                 unreadCount: user.unreadCount + 1,
                             } : user
                         });
 
-                        const updatedLastDirectMessages = lastDirectMessages.map(lastDirectMessage => {
-                            return lastDirectMessage ? (lastDirectMessage.sender._id === sender._id ? {
+                        const updatedLastDirectMessagesInd = users.findIndex(user => user._id === message.senderId)
+
+                        const updatedLastDirectMessages = lastDirectMessages.map((lastDirectMessage, ind) => {
+                            return lastDirectMessage ? (ind === updatedLastDirectMessagesInd ? {
                                 ...lastDirectMessage,
-                                message: message,
+                                message: message.message,
+                                createdAt: message.createdAt,
                             } : lastDirectMessage) : null
                         });
     
-                        setUsers(updatedUsers);
                         setLastDirectMessages(updatedLastDirectMessages);
+                        setUsers(updatedUsers);
     
                         return ;
                     }
@@ -220,17 +219,25 @@ export default function Chat() {
             
                 const updatedMessages = [
                     ...messages, {
-                    message: message,
+                    message: message.message,
+                    createdAt: message.createdAt,
                     sender: {
                         _id: sender._id,
                         username: sender.username,
                     },
+                    receiver: {
+                        _id: userId,
+                        username: username,
+                    }
                 }];
 
-                const updatedLastDirectMessages = lastDirectMessages.map(lastDirectMessage => {
-                    return lastDirectMessage ? (lastDirectMessage.sender._id === userId ? {
+                const updatedLastDirectMessagesInd = users.findIndex(user => user._id === message.receiverId)
+
+                const updatedLastDirectMessages = lastDirectMessages.map((lastDirectMessage, ind) => {
+                    return lastDirectMessage ? (ind === updatedLastDirectMessagesInd ? {
                         ...lastDirectMessage,
-                        message: message,
+                        message: message.message,
+                        createdAt: message.createdAt,
                     } : lastDirectMessage) : null
                 });
             
@@ -243,7 +250,10 @@ export default function Chat() {
                     playSoundIncomingChat();
                     if (chatId !== selectedChat && sender._id !== userId) {
                         const updatedGroups = groups.map(group =>
-                            group._id === chatId ? { ...group, unreadCount: group.unreadCount + 1 } : group
+                            group._id === chatId ? { 
+                                ...group, 
+                                unreadCount: group.unreadCount + 1 
+                            } : group
                         );
     
                         setGroups(updatedGroups);
@@ -254,11 +264,16 @@ export default function Chat() {
             
                 const updatedMessages = [
                     ...messages, {
-                    message: message,
+                    message: message.message,
+                    createdAt: message.createdAt,
                     sender: {
                         _id: sender._id,
                         username: sender.username,
                     },
+                    receiver: {
+                        _id: chatId,
+                        username: '',
+                    }
                 }];
             
                 setMessages(updatedMessages) ;

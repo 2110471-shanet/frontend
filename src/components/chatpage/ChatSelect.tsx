@@ -42,46 +42,35 @@ export default function ChatSelect({
 
     useEffect(() => {
         if (activeUserInd !== null && users[activeUserInd]) {
-            // console.log(users[activeUserInd].username)
             setCurrentUsername(users[activeUserInd].username);
         }
     }, [users, activeUserInd]);
 
+    const sortedCombined = users
+        .map((user, i) => ({
+            user,
+            message: lastDirectMessages[i]
+        }))
+        .sort((a, b) => {
+            const dateA = a.message?.createdAt ? new Date(a.message.createdAt).getTime() : 0;
+            const dateB = b.message?.createdAt ? new Date(b.message.createdAt).getTime() : 0;
+            return dateB - dateA;
+        });
+
     const userNodes = (
-        users
-        // .sort((a: any, b: any) => {
-        //     const lastMessageA = a.lastMessage;
-        //     const lastMessageB = b.lastMessage;
-
-        //     // if (lastMessageA)
-        //     //     console.log(lastMessageA);
-            
-        //     // if (lastMessageB)
-        //     //     console.log(lastMessageB);
-
-        //     if (!lastMessageA && !lastMessageB) {
-        //         return 0;
-        //     } else if (!lastMessageA) {
-        //         return lastMessageB.createdAt;
-        //     } else if (!lastMessageB) {
-        //         return lastMessageA.createdAt;
-        //     } else {
-        //         return b.lastMessage.createdAt - a.lastMessage.createdAt;
-        //     }
-        // })
-        .map((userInfo, ind) => {
-            if (userId === userInfo._id) {
-                return null;
+        sortedCombined.map(({ user, message }, ind) => {
+            if (userId === user._id) {
+              return null;
             }
 
             return (
-                <User key={ind} userId={userInfo._id} username={userInfo.username} 
-                    status={userInfo.status} numUnread={userInfo.unreadCount} 
-                    lastMessage={lastDirectMessages[ind] ? lastDirectMessages[ind].message : ''}
+                <User key={ind} userId={user._id} username={user.username} 
+                    status={user.status} numUnread={user.unreadCount} 
+                    lastMessage={message ? message.message : ''}
                     onClickHandler={(e: SyntheticEvent<HTMLDivElement>) => {
                         setChatSelectionState("loading");
-                        setCurrentUsername(userInfo.username);
-                        socket.emit('read-direct-message', userId, userInfo._id); // receiver, sender
+                        setCurrentUsername(user.username);
+                        socket.emit('read-direct-message', userId, user._id); // receiver, sender
                     }} />
             );
         })
