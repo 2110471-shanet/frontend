@@ -4,7 +4,7 @@ import CreateGroup from "./CreateGroup";
 import Group from "./Group";
 import LinkGroup from "./LinkGroup";
 import User from "./User";
-import { GroupType, UserType, UserWithLastMessageType } from "@/types";
+import { GroupType, MessageType, UserType, UserWithLastMessageType } from "@/types";
 import { useUser } from "../provider/UserProvider";
 import { useGroup } from "../provider/GroupProvider";
 import { useChatSelectionState } from "@/app/chat/pageContext";
@@ -14,10 +14,12 @@ export default function ChatSelect({
     isChatSelectionShown,
     users,
     groups,
+    lastDirectMessages,
 }: {
     isChatSelectionShown: boolean,
     users: Array<UserType>,
     groups: Array<GroupType>,
+    lastDirectMessages: Array<MessageType | null>,
 }) {
     const { isSelectedDirectChat, setChatSelectionState } = useChatSelectionState();
     const { userId, username, setCurrentUsername } = useUser() ;
@@ -46,36 +48,41 @@ export default function ChatSelect({
     }, [users, activeUserInd]);
 
     const userNodes = (
-        users.sort((a: any, b: any) => {
-            const lastMessageA = a.lastMessage;
-            const lastMessageB = b.lastMessage;
+        users
+        // .sort((a: any, b: any) => {
+        //     const lastMessageA = a.lastMessage;
+        //     const lastMessageB = b.lastMessage;
 
-            // if (lastMessageA)
-            //     console.log(lastMessageA);
+        //     // if (lastMessageA)
+        //     //     console.log(lastMessageA);
             
-            // if (lastMessageB)
-            //     console.log(lastMessageB);
+        //     // if (lastMessageB)
+        //     //     console.log(lastMessageB);
 
-            if (!lastMessageA && !lastMessageB) {
-                return 0;
-            } else if (!lastMessageA) {
-                return lastMessageB.createdAt;
-            } else if (!lastMessageB) {
-                return lastMessageA.createdAt;
-            } else {
-                return b.lastMessage.createdAt - a.lastMessage.createdAt;
-            }
-        }).map((userInfo, ind) => {
+        //     if (!lastMessageA && !lastMessageB) {
+        //         return 0;
+        //     } else if (!lastMessageA) {
+        //         return lastMessageB.createdAt;
+        //     } else if (!lastMessageB) {
+        //         return lastMessageA.createdAt;
+        //     } else {
+        //         return b.lastMessage.createdAt - a.lastMessage.createdAt;
+        //     }
+        // })
+        .map((userInfo, ind) => {
             if (userId === userInfo._id) {
                 return null;
             }
 
             return (
-                <User key={ind} userId={userInfo._id} username={userInfo.username} status={userInfo.status} numUnread={userInfo.unreadCount} onClickHandler={(e: SyntheticEvent<HTMLDivElement>) => {
-                    setChatSelectionState("loading");
-                    setCurrentUsername(userInfo.username);
-                    socket.emit('read-direct-message', userId, userInfo._id); // receiver, sender
-                }} />
+                <User key={ind} userId={userInfo._id} username={userInfo.username} 
+                    status={userInfo.status} numUnread={userInfo.unreadCount} 
+                    lastMessage={lastDirectMessages[ind] ? lastDirectMessages[ind].message : ''}
+                    onClickHandler={(e: SyntheticEvent<HTMLDivElement>) => {
+                        setChatSelectionState("loading");
+                        setCurrentUsername(userInfo.username);
+                        socket.emit('read-direct-message', userId, userInfo._id); // receiver, sender
+                    }} />
             );
         })
     );

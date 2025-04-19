@@ -5,6 +5,7 @@ import Person2RoundedIcon from '@mui/icons-material/Person2Rounded';
 import { useChatSelectionState } from '@/app/chat/pageContext';
 import { SyntheticEvent } from 'react';
 import { useUser } from '../provider/UserProvider';
+import { MessageType } from '@/types';
 
 // username, isOnline, other set staet function...
 export default function User({
@@ -12,12 +13,14 @@ export default function User({
     username,
     numUnread,
     status,
+    lastMessage,
     onClickHandler
 }: {
     userId: string,
     username: string,
     numUnread: number,
     status: string,
+    lastMessage: string,
     onClickHandler: Function
 }) {
     const { currentUsername } = useUser();
@@ -38,6 +41,8 @@ export default function User({
             // setChatSelectionState("ready");
         }
     }
+
+    // const lastMesssage = "Did you see my message boi?";
     
     return (
         <div className={`w-full bg-white rounded-md outline outline-slate-200 duration-100 hover:outline-slate-400 hover:drop-shadow-sm h-20 shrink-0 flex items-center px-4 gap-2 hover:cursor-pointer ${(status==="online")? "": "opacity-50"}`} onClick={(e) => {
@@ -48,12 +53,13 @@ export default function User({
                 <Person2RoundedIcon sx={{height: "60%", width: "60%", color: "white",}} />
             </div>
             <div className="flex-1 flex flex-col justify-center max-w-full truncate">
-                <span className="max-w-full w-full truncate">{username}</span>
-                <span className={`text-xs ${(status === "online")? "text-green-600": "text-slate-500"}`}>
+                <span className={`max-w-full w-full truncate ${(status==="online")? "text-green-700 font-semibold": ""}`}>{username}</span>
+                <span className={`max-w-full w-full truncate text-xs ${(numUnread > 0 && status==="online")? "text-slate-600": "text-slate-400"}`}>{lastMessage}</span>
+                {/* <span className={`text-xs ${(status === "online")? "text-green-600": "text-slate-500"}`}>
                     {(status === "online")?
                     "Online":
                     "Offline"}
-                </span>
+                </span> */}
             </div>
             <div className={`w-8 h-6 rounded-full text-white flex justify-center items-center ${(numUnread === 0)? "hidden": ""} ${(status==="online")? "bg-red-500": "bg-slate-500"}`}>
                 <span className="max-w-full truncate text-xs">
