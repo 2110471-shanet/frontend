@@ -37,7 +37,7 @@ export default function Chat() {
     const [users, setUsers] = useState<Array<UserType>>([]) ;
     const [groups, setGroups] = useState<Array<GroupType>>([]) ;
     const [lastDirectMessages, setLastDirectMessages] = useState<Array<MessageType | null>>([]);
-    const [typingUsers, setTypingUsers] = useState<Array<string>>(['Mos']);
+    const [typingUsers, setTypingUsers] = useState<Array<string>>([]);
 
     const messagesContextValue = useMemo(() => ({messages, setMessages}), [messages]);
 
