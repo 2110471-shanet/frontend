@@ -207,7 +207,11 @@ export default function Chat() {
             });
 
             socket.on('receive-direct-message', (message, sender) => {
-                const updatedLastDirectMessagesInd = users.findIndex(user => user._id === message.senderId)
+                const isSendingToSelf = message.senderId === userId;
+                const isChatIsOpenned = message.senderId === selectedChat || message.receiverId == selectedChat;
+
+                const isSenderOrReceiver = (user: UserType) => user._id === message.receiverId || user._id === message.senderId;
+                const updatedLastDirectMessagesInd = users.findIndex(isSenderOrReceiver);
                 const updatedLastDirectMessages = lastDirectMessages.map((lastDirectMessage, ind) => {
                     return lastDirectMessage ? (ind === updatedLastDirectMessagesInd ? {
                         ...lastDirectMessage,
@@ -218,72 +222,89 @@ export default function Chat() {
 
                 setLastDirectMessages(updatedLastDirectMessages);
 
-                if (sender._id !== userId) {
+                // if not sending to self -> plays sound
+                if (!isSendingToSelf) {
                     playSoundIncomingChat();
-                    if (sender._id.toString() !== selectedChat.toString()) {
-                        const updatedUsers = users.map(user => {
-                            console.log(user.unreadCount);
-                            return user._id === sender._id ? { 
-                                ...user, 
-                                unreadCount: user.unreadCount + 1,
-                            } : user
-                        });
-
-                        setUsers(updatedUsers);
-    
-                        return ;
-                    }
+                } 
+                
+                // if chat is open, it suppose to mark as read
+                if (isChatIsOpenned && !isSendingToSelf) {
+                    socket.emit('read-direct-message', userId, message.senderId);
                 }
-            
-                const updatedMessages = [
-                    ...messages, {
-                    message: message.message,
-                    createdAt: message.createdAt,
-                    sender: {
-                        _id: sender._id,
-                        username: sender.username,
-                    },
-                    receiver: {
-                        _id: userId,
-                        username: username,
-                    }
-                }];
-            
-                setMessages(updatedMessages) ;
+
+                if (isChatIsOpenned) {
+                    // if currently opens that chat -> update messages area
+                    const updatedMessages = [
+                        ...messages, {
+                        message: message.message,
+                        createdAt: message.createdAt,
+                        sender: {
+                            _id: message.senderId,
+                            username: sender.username,
+                        },
+                        receiver: {
+                            _id: userId,
+                            username: username,
+                        }
+                    }];
+                
+                    setMessages(updatedMessages) ;
+                } else if (!isSendingToSelf) {
+                    // but if not currently open and received by others -> update unread count
+                    const updatedUsers = users.map(user => {
+                        console.log(user.unreadCount);
+                        return user._id === sender._id ? { 
+                            ...user, 
+                            unreadCount: user.unreadCount + 1,
+                        } : user
+                    });
+
+                    setUsers(updatedUsers);
+                }
             });
 
-            socket.on('receive-message', (message, sender, chatId) => {
-                if (chatId !== sender._id) {
+            socket.on('receive-message', (message, sender) => {
+                const isSendingToSelf = message.senderId === userId;
+                const isChatIsOpenned = message.chatRoomId === selectedChat;
+
+                // if not sending to self -> plays sound
+                if (!isSendingToSelf) {
                     playSoundIncomingChat();
-                    if (chatId !== selectedChat && sender._id !== userId) {
-                        const updatedGroups = groups.map(group =>
-                            group._id === chatId ? { 
-                                ...group, 
-                                unreadCount: group.unreadCount + 1 
-                            } : group
-                        );
-    
-                        setGroups(updatedGroups);
-    
-                        return ;
-                    }
                 }
-            
-                const updatedMessages = [
-                    ...messages, {
-                    message: message.message,
-                    createdAt: message.createdAt,
-                    sender: {
-                        _id: sender._id,
-                        username: sender.username,
-                    },
-                    receiver: {
-                        _id: chatId,
-                        username: '',
-                    }
-                }];
-            
-                setMessages(updatedMessages) ;
+
+                // if chat is open, it suppose to mark as read
+                if (isChatIsOpenned && !isSendingToSelf) {
+                    socket.emit('read-message', message.chatRoomId);
+                }
+
+                if (isChatIsOpenned) {
+                    // if currently opens that chat -> update messages area
+                    const updatedMessages = [
+                        ...messages, {
+                        message: message.message,
+                        createdAt: message.createdAt,
+                        sender: {
+                            _id: message.senderId,
+                            username: sender.username,
+                        },
+                        receiver: {
+                            _id: message.chatRoomId,
+                            username: '',
+                        }
+                    }];
+                
+                    setMessages(updatedMessages) ;
+                } else if (!isSendingToSelf) {
+                    // but if not currently open and received by others -> update unread count
+                    const updatedGroups = groups.map(group =>
+                        group._id === message.chatRoomId ? { 
+                            ...group, 
+                            unreadCount: group.unreadCount + 1 
+                        } : group
+                    );
+
+                    setGroups(updatedGroups);
+                }
             });
 
             socket.on('direct-message-read', (senderId: string) => {
