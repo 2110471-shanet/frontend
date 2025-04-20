@@ -85,10 +85,8 @@ export default function ChatSelect({
                     numUnread={groupInfo.unreadCount}
                     onClickHandler={(e: SyntheticEvent<HTMLDivElement>) => {
                         // setChatSelectionState("loading");
-                        if (selectedChat !== groupInfo._id) {
-                            setActiveGroupInd(ind);
-                            socket.emit('read-message', groupInfo._id);
-                        }
+                        setActiveGroupInd(ind);
+                        socket.emit('read-message', groupInfo._id);
                     }} />
             );
         })

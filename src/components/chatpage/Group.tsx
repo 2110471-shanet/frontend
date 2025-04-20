@@ -35,7 +35,7 @@ export default function Group({
     async function handleChatSelection(e: SyntheticEvent<HTMLDivElement>) {
         if (!isJoined) {
             setIsShowingMember(!isShowingMember) ;
-        } else if (chatSelectionState !== "loading") {
+        } else if (chatSelectionState !== "loading" && selectedChat !== group._id) {
             setChatSelectionState("loading");
             setIsSelectedDirectChat(false);
             setSelectedChat(group._id.toString()) ;
