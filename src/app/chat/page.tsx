@@ -8,6 +8,7 @@ import { ChatSelectionStateContext, MessagesContext } from "./pageContext";
 
 import type { GroupType, MessageType, UserType, UserWithLastMessageType } from "@/types";
 import { getSocket } from "@/lib/socket";
+import { useRouter } from "next/navigation";
 
 import { useGlobalLoading } from "@/components/provider/GlobalLoadingProvider";
 import { useUser } from "@/components/provider/UserProvider";
@@ -36,6 +37,7 @@ export default function Chat() {
     const [users, setUsers] = useState<Array<UserType>>([]) ;
     const [groups, setGroups] = useState<Array<GroupType>>([]) ;
     const [lastDirectMessages, setLastDirectMessages] = useState<Array<MessageType | null>>([]);
+    const [typingUsers, setTypingUsers] = useState<Array<string>>(['Mos']);
 
     const messagesContextValue = useMemo(() => ({messages, setMessages}), [messages]);
 
@@ -46,20 +48,18 @@ export default function Chat() {
     } = useUser() ;
 
     const isSocketConnectedRef = useRef<boolean>(false);
-    const usersRef = useRef<Array<UserType>>([]) ;
-    const groupsRef = useRef<Array<GroupType>>([]) ;
-    const messagesRef = useRef<Array<MessageType>>([]) ;
 
     const socket = getSocket() ;
+    const router = useRouter();
 
     async function connectSocket() {
         setIsLoading(true) ;
 
+        socket.connect() ;
+
         await fetchUser() ;
         await fetchUsers() ;
         await fetchChatRooms() ;
-
-        socket.connect() ;
 
         setIsLoading(false) ;
     }
@@ -114,6 +114,7 @@ export default function Chat() {
             setChatSelectionState("ready");
         } catch (error) {
             console.log(`error trying to: ${error}`);
+            router.refresh();
             setChatSelectionState("ready");
         }
     }
@@ -122,7 +123,12 @@ export default function Chat() {
         socket.off('room-created');
         socket.off('receive-direct-message');
         socket.off('receive-message');
+        socket.off('direct-message-read');
         socket.off('user-joined-chatroom');
+        socket.off('message-read');
+        socket.off('others-typing');
+        socket.off('others-stop-typing');
+        socket.off('username-changed');
         socket.off('errors');
     }
 
@@ -147,7 +153,7 @@ export default function Chat() {
     useEffect(() => {
         if (isSocketConnectedRef.current) {
             socket.on('connect', () => {    
-                socket.emit('join-rooms', groups) ;
+                socket.emit('join-rooms') ;
             });
             
             socket.on('active', (user, status) => {
@@ -167,6 +173,15 @@ export default function Chat() {
                 );
         
                 setUsers(updatedUsers);
+            });
+
+            socket.on('on-signed-out', () => {
+                // do something
+                if (socket.connected) {
+                    socket.disconnect();
+                }
+
+                router.refresh();
             });
         }
         
@@ -285,7 +300,7 @@ export default function Chat() {
                 );
 
                 setUsers(updatedUsers);
-            })
+            });
 
             socket.on('message-read', (chatId: string) => {
                 const updatedGroups = groups.map(group =>
@@ -293,7 +308,35 @@ export default function Chat() {
                 );
 
                 setGroups(updatedGroups);
-            })
+            });
+
+            socket.on('others-typing', (username: string, typerId: string, chatId: string) => {
+                console.log(username);
+                console.log(typerId);
+                console.log(chatId);
+                if ((chatId !== userId|| typerId !== selectedChat) && chatId !== selectedChat) {
+                    return ;
+                }
+
+                if (typingUsers.includes(username)) {
+                    return;
+                }
+
+                const updatedTypingUsers = [
+                    ...typingUsers, 
+                    username,
+                ];
+
+                console.log(updatedTypingUsers)
+
+                setTypingUsers(updatedTypingUsers);
+            });
+
+            socket.on('others-stop-typing', (username: string) => {
+                const updatedTypingUsers = typingUsers.filter(user => user !== username);
+
+                setTypingUsers(updatedTypingUsers);
+            });
 
             socket.on('username-changed', (updatedUserId: string, newUsername: string) => {
                 if (updatedUserId === userId) {
@@ -395,7 +438,9 @@ export default function Chat() {
                             groups={groups}
                             lastDirectMessages={lastDirectMessages}
                         />
-                        <ChatBox />
+                        <ChatBox 
+                            typingUsers={typingUsers}
+                        />
                     </ChatSelectionStateContext>
                 </MessagesContext>
             </main>
