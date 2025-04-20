@@ -21,7 +21,7 @@ export default function ChatSelect({
     groups: Array<GroupType>,
     lastDirectMessages: Array<MessageType | null>,
 }) {
-    const { isSelectedDirectChat, setChatSelectionState } = useChatSelectionState();
+    const { isSelectedDirectChat, setChatSelectionState, selectedChat } = useChatSelectionState();
     const { userId, username, setCurrentUsername } = useUser() ;
     const { 
         members, setMembers,
@@ -68,9 +68,11 @@ export default function ChatSelect({
                     status={user.status} numUnread={user.unreadCount} 
                     lastMessage={message ? message.message : ''}
                     onClickHandler={(e: SyntheticEvent<HTMLDivElement>) => {
-                        setChatSelectionState("loading");
-                        setCurrentUsername(user.username);
-                        socket.emit('read-direct-message', userId, user._id); // receiver, sender
+                        if (selectedChat !== user._id) {
+                            setChatSelectionState("loading");
+                            setCurrentUsername(user.username);
+                            socket.emit('read-direct-message', userId, user._id); // receiver, sender
+                        }
                     }} />
             );
         })
@@ -83,8 +85,10 @@ export default function ChatSelect({
                     numUnread={groupInfo.unreadCount}
                     onClickHandler={(e: SyntheticEvent<HTMLDivElement>) => {
                         // setChatSelectionState("loading");
-                        setActiveGroupInd(ind);
-                        socket.emit('read-message', groupInfo._id);
+                        if (selectedChat !== groupInfo._id) {
+                            setActiveGroupInd(ind);
+                            socket.emit('read-message', groupInfo._id);
+                        }
                     }} />
             );
         })
