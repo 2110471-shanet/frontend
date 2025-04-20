@@ -26,12 +26,6 @@ export default function Chat() {
     const [selectedChat, setSelectedChat] = useState<string>('') ;
     const [isSelectedDirectChat, setIsSelectedDirectChat] = useState<boolean>(false);
 
-    const chatSelectionStateContextValue = useMemo(() => ({
-        chatSelectionState, setChatSelectionState,
-        selectedChat, setSelectedChat,
-        isSelectedDirectChat, setIsSelectedDirectChat,
-    }), [chatSelectionState, selectedChat, isSelectedDirectChat]);
-
     // [{sender, message}]
     const [messages, setMessages] = useState<Array<MessageType>>([]);
     const [users, setUsers] = useState<Array<UserType>>([]) ;
@@ -39,12 +33,19 @@ export default function Chat() {
     const [lastDirectMessages, setLastDirectMessages] = useState<Array<MessageType | null>>([]);
     const [typingUsers, setTypingUsers] = useState<Array<string>>([]);
 
+    // context
     const messagesContextValue = useMemo(() => ({messages, setMessages}), [messages]);
+    const chatSelectionStateContextValue = useMemo(() => ({
+        chatSelectionState, setChatSelectionState,
+        selectedChat, setSelectedChat,
+        isSelectedDirectChat, setIsSelectedDirectChat,
+    }), [chatSelectionState, selectedChat, isSelectedDirectChat]);
+
 
     const { isLoading, setIsLoading } = useGlobalLoading() ;
     const { 
-        username, userId, currentUsername,
-        setUsername, setUserId, setCurrentUsername,
+        username, userId,
+        setUsername, setUserId,
     } = useUser() ;
 
     const isSocketConnectedRef = useRef<boolean>(false);
@@ -124,11 +125,11 @@ export default function Chat() {
         socket.off('receive-direct-message');
         socket.off('receive-message');
         socket.off('direct-message-read');
-        socket.off('user-joined-chatroom');
         socket.off('message-read');
         socket.off('others-typing');
         socket.off('others-stop-typing');
         socket.off('username-changed');
+        socket.off('user-joined-chatroom');
         socket.off('errors');
     }
 
@@ -186,8 +187,10 @@ export default function Chat() {
         }
         
         return () => {
-            socket.off('join-rooms');
+            socket.off('connect');
             socket.off('active');
+            socket.off('join-rooms');
+            socket.off('on-signed-out');
         }
     }, [isSocketConnectedRef, users, groups]);
 
@@ -204,9 +207,20 @@ export default function Chat() {
             });
 
             socket.on('receive-direct-message', (message, sender) => {
+                const updatedLastDirectMessagesInd = users.findIndex(user => user._id === message.senderId)
+                const updatedLastDirectMessages = lastDirectMessages.map((lastDirectMessage, ind) => {
+                    return lastDirectMessage ? (ind === updatedLastDirectMessagesInd ? {
+                        ...lastDirectMessage,
+                        message: message.message,
+                        createdAt: message.createdAt,
+                    } : lastDirectMessage) : null
+                });
+
+                setLastDirectMessages(updatedLastDirectMessages);
+
                 if (sender._id !== userId) {
                     playSoundIncomingChat();
-                    if (sender._id !== selectedChat) {
+                    if (sender._id.toString() !== selectedChat.toString()) {
                         const updatedUsers = users.map(user => {
                             console.log(user.unreadCount);
                             return user._id === sender._id ? { 
@@ -215,17 +229,6 @@ export default function Chat() {
                             } : user
                         });
 
-                        const updatedLastDirectMessagesInd = users.findIndex(user => user._id === message.senderId)
-
-                        const updatedLastDirectMessages = lastDirectMessages.map((lastDirectMessage, ind) => {
-                            return lastDirectMessage ? (ind === updatedLastDirectMessagesInd ? {
-                                ...lastDirectMessage,
-                                message: message.message,
-                                createdAt: message.createdAt,
-                            } : lastDirectMessage) : null
-                        });
-    
-                        setLastDirectMessages(updatedLastDirectMessages);
                         setUsers(updatedUsers);
     
                         return ;
@@ -245,19 +248,8 @@ export default function Chat() {
                         username: username,
                     }
                 }];
-
-                const updatedLastDirectMessagesInd = users.findIndex(user => user._id === message.receiverId)
-
-                const updatedLastDirectMessages = lastDirectMessages.map((lastDirectMessage, ind) => {
-                    return lastDirectMessage ? (ind === updatedLastDirectMessagesInd ? {
-                        ...lastDirectMessage,
-                        message: message.message,
-                        createdAt: message.createdAt,
-                    } : lastDirectMessage) : null
-                });
             
                 setMessages(updatedMessages) ;
-                setLastDirectMessages(updatedLastDirectMessages);
             });
 
             socket.on('receive-message', (message, sender, chatId) => {
@@ -311,9 +303,6 @@ export default function Chat() {
             });
 
             socket.on('others-typing', (username: string, typerId: string, chatId: string) => {
-                console.log(username);
-                console.log(typerId);
-                console.log(chatId);
                 if ((chatId !== userId|| typerId !== selectedChat) && chatId !== selectedChat) {
                     return ;
                 }
@@ -326,8 +315,6 @@ export default function Chat() {
                     ...typingUsers, 
                     username,
                 ];
-
-                console.log(updatedTypingUsers)
 
                 setTypingUsers(updatedTypingUsers);
             });
@@ -382,6 +369,10 @@ export default function Chat() {
                 }
 
                 setGroups(updatedGroups) ;
+            });
+
+            socket.on('errors', (message: string) => {
+                console.log(message);
             });
         }
 

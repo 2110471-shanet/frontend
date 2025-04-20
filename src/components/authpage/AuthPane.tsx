@@ -50,7 +50,6 @@ export default function SignUpPane({
             setErrorMessage("username cannot contain any space.");
         } else {
             setIsLocalLoading(true);
-            console.log(process.env.NEXT_PUBLIC_SERVER_URL);
 
             try {
                 const res = await customAxios.post("/auth/register", {
