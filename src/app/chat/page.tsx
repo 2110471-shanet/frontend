@@ -252,7 +252,6 @@ export default function Chat() {
                 } else if (!isSendingToSelf) {
                     // but if not currently open and received by others -> update unread count
                     const updatedUsers = users.map(user => {
-                        console.log(user.unreadCount);
                         return user._id === sender._id ? { 
                             ...user, 
                             unreadCount: user.unreadCount + 1,
