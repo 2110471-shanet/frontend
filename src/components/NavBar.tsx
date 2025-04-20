@@ -28,7 +28,7 @@ export default function NavBar({
     isChatSelectionShown: boolean,
     setIsChatSelectionShown: Function,
 }) {
-    const { username, setUsername } = useUser();
+    const { username, setUsername, userId } = useUser();
     const { isLoading, setIsLoading } = useGlobalLoading();
     const [ isSettingUsername, setIsSettingUsername ] = useState(false);
 
@@ -60,7 +60,7 @@ export default function NavBar({
             } else {
                 setIsLoading(true);
 
-                // socket.emit('change-username', inputValue);
+                socket.emit('change-username', inputValue);
 
                 setInputValue("");
                 setIsLoading(false);
@@ -75,6 +75,7 @@ export default function NavBar({
         try {
             setIsLoading(true);
             const res = await customAxios.get("/auth/logout");
+            socket.emit('signed-out', userId);
             router.push("signin");
             await new Promise((resolve) => {
                 setTimeout(resolve, 100);

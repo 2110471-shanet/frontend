@@ -12,7 +12,11 @@ import { ToastContainer, Flip } from "react-toastify";
 import { useGroup } from "../provider/GroupProvider";
 import { useUser } from "../provider/UserProvider";
 
-export default function ChatBox() {
+export default function ChatBox({
+    typingUsers,
+}: {
+    typingUsers: Array<string>,
+}) {
 
     const { chatSelectionState, setChatSelectionState } = useChatSelectionState();
 
@@ -32,6 +36,8 @@ export default function ChatBox() {
     useEffect(() => {
         console.log(currentUsername);
     }, [chatSelectionState]);
+
+    // const typingUsers = ["Bobby", "Milner"];
 
     if (chatSelectionState === "ready") {
         return (
@@ -58,7 +64,7 @@ export default function ChatBox() {
                         }
                     </span>
                 </div>
-                <Messages />
+                <Messages typers={typingUsers} />
                 <TextInput />
             </div>
         );

@@ -4,21 +4,24 @@ import CreateGroup from "./CreateGroup";
 import Group from "./Group";
 import LinkGroup from "./LinkGroup";
 import User from "./User";
-import { GroupType, UserType, UserWithLastMessageType } from "@/types";
+import { GroupType, MessageType, UserType, UserWithLastMessageType } from "@/types";
 import { useUser } from "../provider/UserProvider";
 import { useGroup } from "../provider/GroupProvider";
 import { useChatSelectionState } from "@/app/chat/pageContext";
+import { getSocket } from "@/lib/socket";
 
 export default function ChatSelect({
     isChatSelectionShown,
     users,
     groups,
+    lastDirectMessages,
 }: {
     isChatSelectionShown: boolean,
-    users: Array<UserWithLastMessageType>,
+    users: Array<UserType>,
     groups: Array<GroupType>,
+    lastDirectMessages: Array<MessageType | null>,
 }) {
-    const { isSelectedDirectChat, setChatSelectionState } = useChatSelectionState();
+    const { isSelectedDirectChat, setChatSelectionState, selectedChat } = useChatSelectionState();
     const { userId, username, setCurrentUsername } = useUser() ;
     const { 
         members, setMembers,
@@ -27,6 +30,8 @@ export default function ChatSelect({
 
     const [activeGroupInd, setActiveGroupInd] = useState<number | null>(null);
     const [activeUserInd, setActiveUserInd] = useState<number | null>(null);
+
+    const socket = getSocket();
 
     useEffect(() => {
         if (activeGroupInd !== null && groups[activeGroupInd]) {
@@ -37,41 +42,38 @@ export default function ChatSelect({
 
     useEffect(() => {
         if (activeUserInd !== null && users[activeUserInd]) {
-            // console.log(users[activeUserInd].username)
             setCurrentUsername(users[activeUserInd].username);
         }
     }, [users, activeUserInd]);
 
+    const sortedCombined = users
+        .map((user, i) => ({
+            user,
+            message: lastDirectMessages[i]
+        }))
+        .sort((a, b) => {
+            const dateA = a.message?.createdAt ? new Date(a.message.createdAt).getTime() : 0;
+            const dateB = b.message?.createdAt ? new Date(b.message.createdAt).getTime() : 0;
+            return dateB - dateA;
+        });
+
     const userNodes = (
-        users.sort((a: any, b: any) => {
-            const lastMessageA = a.lastMessage;
-            const lastMessageB = b.lastMessage;
-
-            // if (lastMessageA)
-            //     console.log(lastMessageA);
-            
-            // if (lastMessageB)
-            //     console.log(lastMessageB);
-
-            if (!lastMessageA && !lastMessageB) {
-                return 0;
-            } else if (!lastMessageA) {
-                return lastMessageB.createdAt;
-            } else if (!lastMessageB) {
-                return lastMessageA.createdAt;
-            } else {
-                return b.lastMessage.createdAt - a.lastMessage.createdAt;
-            }
-        }).map((userInfo, ind) => {
-            if (username === userInfo.username) {
-                return null;
+        sortedCombined.map(({ user, message }, ind) => {
+            if (userId === user._id) {
+              return null;
             }
 
             return (
-                <User key={ind} userId={userInfo._id} username={userInfo.username} status={userInfo.status} numUnread={userInfo.unreadCount} onClickHandler={(e: SyntheticEvent<HTMLDivElement>) => {
-                    setChatSelectionState("loading");
-                    setCurrentUsername(userInfo.username);
-                }} />
+                <User key={ind} userId={user._id} username={user.username} 
+                    status={user.status} numUnread={user.unreadCount} 
+                    lastMessage={message ? message.message : ''}
+                    onClickHandler={(e: SyntheticEvent<HTMLDivElement>) => {
+                        if (selectedChat !== user._id) {
+                            setChatSelectionState("loading");
+                            setCurrentUsername(user.username);
+                            socket.emit('read-direct-message', userId, user._id); // receiver, sender
+                        }
+                    }} />
             );
         })
     );
@@ -79,10 +81,15 @@ export default function ChatSelect({
     const groupNodes = (
         groups.map((groupInfo, ind) => {
             return (
-                <Group key={ind} group={groupInfo} isJoined={groupInfo.members.map(member => member._id).includes(userId)} onClickHandler={(e: SyntheticEvent<HTMLDivElement>) => {
-                    setChatSelectionState("loading");
-                    setActiveGroupInd(ind);
-                }} />
+                <Group key={ind} group={groupInfo} isJoined={groupInfo.members.map(member => member._id).includes(userId)}
+                    numUnread={groupInfo.unreadCount}
+                    onClickHandler={(e: SyntheticEvent<HTMLDivElement>) => {
+                        // setChatSelectionState("loading");
+                        if (selectedChat !== groupInfo._id) {
+                            setActiveGroupInd(ind);
+                            socket.emit('read-message', groupInfo._id);
+                        }
+                    }} />
             );
         })
     );

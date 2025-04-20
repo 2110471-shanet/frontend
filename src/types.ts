@@ -30,7 +30,7 @@ type GroupType = {
     chatName: string,
     lastMessage: string,
     members: Array<UserType>,
-    numUnread: number,
+    unreadCount: number,
 }
 
 type GroupContextType = {
@@ -56,8 +56,12 @@ type MessageType = {
         _id: string,
         username: string,
     };
+    receiver: {
+        _id: string,
+        username: string,
+    }
     message: string;
-    // createdAt: Date;
+    createdAt: Date;
 };
 
 type MessagesContextType = {

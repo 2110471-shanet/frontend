@@ -6,15 +6,16 @@ import LoginRoundedIcon from '@mui/icons-material/LoginRounded';
 import { SyntheticEvent, useEffect, useState } from 'react';
 import { useGroup } from '../provider/GroupProvider';
 import { getSocket } from '@/lib/socket';
-import { useUser } from '../provider/UserProvider';
 
 export default function Group({
     group,
     isJoined,
+    numUnread,
     onClickHandler,
 }: {
     group: GroupType,
     isJoined: boolean,
+    numUnread: number,
     onClickHandler: Function
 }) {
     const { 
@@ -28,7 +29,6 @@ export default function Group({
     const socket = getSocket() ;
 
     async function handleJoinGroup(e: SyntheticEvent<HTMLDivElement>) {
-        console.log('join')
         socket.emit('join-chatroom', group._id.toString()) ;
     }
 
@@ -36,6 +36,7 @@ export default function Group({
         if (!isJoined) {
             setIsShowingMember(!isShowingMember) ;
         } else if (chatSelectionState !== "loading") {
+            setChatSelectionState("loading");
             setIsSelectedDirectChat(false);
             setSelectedChat(group._id.toString()) ;
         }
@@ -68,6 +69,15 @@ export default function Group({
                 }}
             >
                 <LoginRoundedIcon sx={{height: "60%", width: "60%", color: "white", marginRight: "1px",}} />
+            </div>
+            <div className={`w-10 h-6 bg-red-500 text-white rounded-full ${(isJoined)? "": "hidden"} flex justify-center items-center ${(numUnread < 1) ? "hidden" : ""}`}>
+                <span className="text-xs">
+                    {
+                        (numUnread > 99)?
+                        "99+":
+                        numUnread
+                    }
+                </span>
             </div>
         </div>
     );
