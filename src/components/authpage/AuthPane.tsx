@@ -85,11 +85,11 @@ export default function SignUpPane({
                     username: username,
                     password: password,
                 });
-                console.log("huh!?")
-                setIsLocalLoading(false);
                 await new Promise((resolve) => {
                     setTimeout(resolve, 100);
                 });
+                console.log("huh!?")
+                setIsLocalLoading(false);
                 router.refresh();
             } catch {
                 setErrorMessage("error happened");
