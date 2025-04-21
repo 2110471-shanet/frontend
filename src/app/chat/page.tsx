@@ -166,6 +166,11 @@ export default function Chat() {
                         }
                     ]);
 
+                    // console.log(users);
+                    // cons
+
+                    console.log(lastDirectMessages);
+
                     setLastDirectMessages(prev => [
                         ...prev, 
                         null,
@@ -203,7 +208,7 @@ export default function Chat() {
                 setGroups(prevGroups => [
                     ...prevGroups, {
                         ...room,
-                        numunread: 0,
+                        unreadCount: 0,
                     }
                 ]);
             });
@@ -216,11 +221,22 @@ export default function Chat() {
                 const updatedLastDirectMessagesInd = users.findIndex(isSenderOrReceiver);
 
                 setLastDirectMessages(prevLastDirectMessages => prevLastDirectMessages.map((lastDirectMessage, ind) => {
-                    return lastDirectMessage ? (ind === updatedLastDirectMessagesInd ? {
-                        ...lastDirectMessage,
+                    const isTargetChat = ind === updatedLastDirectMessagesInd;
+
+                    const newLastDirectMessage: MessageType = {
                         message: message.message,
-                        createdAt: message.createdAt,
-                    } : lastDirectMessage) : null
+                        createdAt: message.createAt,
+                        sender: {
+                            _id: message.senderId,
+                            username: sender.username,
+                        },
+                        receiver: {
+                            _id: message.receiverId,
+                            username: '',
+                        }
+                    };
+
+                    return isTargetChat ? newLastDirectMessage : lastDirectMessage;
                 }));    
 
                 // if not sending to self -> plays sound

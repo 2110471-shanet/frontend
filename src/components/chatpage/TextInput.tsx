@@ -82,7 +82,7 @@ export default function TextInput() {
                 onFocus={typingHandler}
                 onBlur={(e) => {
                     // e.stopPropagation();
-                    stopTypingHandler(e);
+                    // stopTypingHandler(e);
                 }}
                 onChange={(e) => {
                     setInputValue(e.target.value) ;
