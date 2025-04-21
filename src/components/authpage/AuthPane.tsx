@@ -68,7 +68,7 @@ export default function SignUpPane({
         }
     }
 
-    async function handleSignInButton(e: SyntheticEvent<HTMLButtonElement>) {
+     async function handleSignInButton(e: SyntheticEvent<HTMLButtonElement>) {
         e.stopPropagation();
         e.preventDefault();
         if (username.length <= 0) {
@@ -85,15 +85,12 @@ export default function SignUpPane({
                     username: username,
                     password: password,
                 });
-                await new Promise((resolve) => {
-                    setTimeout(resolve, 100);
-                });
-                router.push("/chat");
-                await new Promise((resolve) => {
-                    setTimeout(resolve, 100);
-                });
                 console.log("huh!?")
                 setIsLocalLoading(false);
+                await new Promise((resolve) => {
+                    setTimeout(resolve, 100);
+                });
+                router.refresh();
             } catch {
                 setErrorMessage("error happened");
                 setIsLocalLoading(false);

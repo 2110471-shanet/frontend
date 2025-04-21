@@ -9,6 +9,7 @@ import DoneRoundedIcon from '@mui/icons-material/DoneRounded';
 import ClearRoundedIcon from '@mui/icons-material/ClearRounded';
 import CreateRoundedIcon from '@mui/icons-material/CreateRounded';
 import AccountBoxRoundedIcon from '@mui/icons-material/AccountBoxRounded';
+import { getSocket } from "@/lib/socket";
 
 export default function ChangeNameMobile({
     isChatSelectionShown
@@ -22,6 +23,8 @@ export default function ChangeNameMobile({
     const [ isSettingUsername, setIsSettingUsername ] = useState(true);
     const [ inputValue, setInputValue ] = useState("");
 
+    const socket = getSocket();
+
     async function handleSettingUsername(e: KeyboardEvent<HTMLInputElement>) {
         e.stopPropagation();
         if (e.key === "Escape") {
@@ -33,10 +36,9 @@ export default function ChangeNameMobile({
                 setInputValue("");
             } else {
                 setIsLoading(true);
-                await new Promise((resolve) => {
-                    setTimeout(resolve, 500);
-                });
-                setUsername(inputValue);
+
+                socket.emit('change-username', inputValue);
+
                 setInputValue("");
                 setIsLoading(false);
                 setIsSettingUsername(false);
@@ -80,10 +82,9 @@ export default function ChangeNameMobile({
                         setInputValue("");
                     } else {
                         setIsLoading(true);
-                        await new Promise((resolve) => {
-                            setTimeout(resolve, 500);
-                        });
-                        setUsername(inputValue);
+
+                        socket.emit('change-username', inputValue);
+
                         setInputValue("");
                         setIsLoading(false);
                         setIsSettingUsername(false);
