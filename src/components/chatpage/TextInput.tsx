@@ -17,13 +17,13 @@ export default function TextInput() {
 
     function sendDirectMessage() {
         socket.emit('send-direct-message', inputValue, selectedChat, async (message: string) => {
-            console.log(message) ;
+            // console.log(message) ;
         });
     }
 
     function sendGroupMessage() {
         socket.emit('send-message', inputValue, selectedChat, async (message: string) => {
-            console.log(message) ;
+            // console.log(message) ;
         });
     }
 
