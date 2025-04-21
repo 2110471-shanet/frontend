@@ -49,8 +49,8 @@ export default function GroupProvider({
                 e.stopPropagation();
                 e.preventDefault();
                 setIsShowingMember(false);
-                setGroupName("");
-                setMembers([]);
+                // setGroupName("");
+                // setMembers([]);
             }}>
                 <div className="w-96 h-96 shrink-0 bg-white z-60 rounded-lg drop-shadow-md px-6 py-6 flex flex-col items-center" onClick={(e) => {
                     e.stopPropagation();
@@ -61,8 +61,8 @@ export default function GroupProvider({
                     </div>
                     <button className="px-3 py-1 outline outline-slate-300 duration-100 hover:outline-slate-500 rounded-md text-sm hover:cursor-pointer active:outline-slate-700 self-start" onClick={(e) => {
                         setIsShowingMember(false);
-                        setGroupName("");
-                        setMembers([]);
+                        // setGroupName("");
+                        // setMembers([]);
                     }}>back</button>
                 </div>
 
