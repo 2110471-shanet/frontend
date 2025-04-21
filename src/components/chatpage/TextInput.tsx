@@ -16,15 +16,13 @@ export default function TextInput() {
     const socket = getSocket() ;
 
     function sendDirectMessage() {
-        socket.emit('send-direct-message', inputValue, selectedChat, async (message: string) => {
-            // console.log(message) ;
-        });
+        socket.emit('send-direct-message', inputValue, selectedChat, async (message: string) => { });
+        socket.emit('stop-typing', username, selectedChat);
     }
 
     function sendGroupMessage() {
-        socket.emit('send-message', inputValue, selectedChat, async (message: string) => {
-            // console.log(message) ;
-        });
+        socket.emit('send-message', inputValue, selectedChat, async (message: string) => { });
+        socket.emit('stop-typing', username, selectedChat);
     }
 
     function sendMessageHandler() {
