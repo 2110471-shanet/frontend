@@ -6,7 +6,7 @@ import NavBar from "@/components/NavBar";
 import { useState, useEffect, createContext, useMemo, useContext, useRef } from "react";
 import { ChatSelectionStateContext, MessagesContext } from "./pageContext";
 
-import type { GroupType, MessageType, UserType, UserWithLastMessageType } from "@/types";
+import type { GroupType, MessageType, UserType, TypingStatusType } from "@/types";
 import { getSocket } from "@/lib/socket";
 import { useRouter } from "next/navigation";
 
@@ -31,7 +31,7 @@ export default function Chat() {
     const [users, setUsers] = useState<Array<UserType>>([]) ;
     const [groups, setGroups] = useState<Array<GroupType>>([]) ;
     const [lastDirectMessages, setLastDirectMessages] = useState<Array<MessageType | null>>([]);
-    const [typingUsers, setTypingUsers] = useState<Array<string>>([]);
+    const [typingStatus, setTypingStatus] = useState<TypingStatusType>({});
 
     // context
     const messagesContextValue = useMemo(() => ({messages, setMessages}), [messages]);
@@ -98,6 +98,7 @@ export default function Chat() {
 
         setLastDirectMessages(reducedLastDirectMessages);
         setUsers(res.data.users);
+        setTypingStatus(Object.fromEntries(res.data.users.map((user: any) => [user.username, null])));
     }
 
     async function fetchChatRooms() {
@@ -203,7 +204,7 @@ export default function Chat() {
                 setGroups(prevGroups => [
                     ...prevGroups, {
                         ...room,
-                        numunread: 0,
+                        unreadCount: 0,
                     }
                 ]);
             });
@@ -216,11 +217,22 @@ export default function Chat() {
                 const updatedLastDirectMessagesInd = users.findIndex(isSenderOrReceiver);
 
                 setLastDirectMessages(prevLastDirectMessages => prevLastDirectMessages.map((lastDirectMessage, ind) => {
-                    return lastDirectMessage ? (ind === updatedLastDirectMessagesInd ? {
-                        ...lastDirectMessage,
+                    const isTargetChat = ind === updatedLastDirectMessagesInd;
+
+                    const newLastDirectMessage: MessageType = {
                         message: message.message,
-                        createdAt: message.createdAt,
-                    } : lastDirectMessage) : null
+                        createdAt: message.createAt,
+                        sender: {
+                            _id: message.senderId,
+                            username: sender.username,
+                        },
+                        receiver: {
+                            _id: message.receiverId,
+                            username: '',
+                        }
+                    };
+
+                    return isTargetChat ? newLastDirectMessage : lastDirectMessage;
                 }));    
 
                 // if not sending to self -> plays sound
@@ -319,20 +331,26 @@ export default function Chat() {
                 if (!isOpennedGroupChat && (!isOpennedDirectChat || !isReceivedDirectChat)) {
                     return;
                 }
-            
-                console.log('other is typing')
-                if (typingUsers.includes(username)) {
-                    return;
-                }
 
-                setTypingUsers(prevTypingUsers => [
-                    ...prevTypingUsers, 
-                    username,
-                ]);
+                const updatedTypingStatus = ({
+                    ...typingStatus,
+                    [username]: chatId,
+                })
+
+                setTypingStatus(prevTypingStatus => ({
+                    ...prevTypingStatus,
+                    [username]: {
+                        chatId: chatId,
+                        typerId: typerId,
+                    },
+                }));
             });
 
             socket.on('others-stop-typing', (username: string) => {
-                setTypingUsers(prevTypingUsers => prevTypingUsers.filter(user => user !== username));
+                setTypingStatus(prevTypingStatus => ({
+                    ...prevTypingStatus,
+                    [username]: null,
+                }))
             });
 
             socket.on('username-changed', (updatedUserId: string, newUsername: string) => {
@@ -435,8 +453,8 @@ export default function Chat() {
                             groups={groups}
                             lastDirectMessages={lastDirectMessages}
                         />
-                        <ChatBox 
-                            typingUsers={typingUsers}
+                        <ChatBox
+                            typingStatus={typingStatus}
                         />
                     </ChatSelectionStateContext>
                 </MessagesContext>

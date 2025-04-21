@@ -1,15 +1,17 @@
-import { useMessages } from "@/app/chat/pageContext";
+import { useChatSelectionState, useMessages } from "@/app/chat/pageContext";
 import Message from "./Message";
 import { useUser } from "../provider/UserProvider";
 import { useEffect, useRef } from "react";
+import { TypingStatusType } from "@/types";
 
 export default function Messages({
-    typers
+    typingStatus,
 }: {
-    typers: Array<string>
+    typingStatus: TypingStatusType
 }) {
     const { messages, setMessages } = useMessages() ;
     const { userId, setUserId } = useUser() ;
+    const { selectedChat } = useChatSelectionState();
 
     const containerRef = useRef<HTMLDivElement>(null);
 
@@ -17,7 +19,19 @@ export default function Messages({
         if (containerRef.current) {
             containerRef.current.scrollTop = containerRef.current.scrollHeight;
         }
-    }, [messages, typers]);
+    }, [messages, typingStatus]);
+
+    function checkIsTypingInChat(chatId: string, typerId: string) {
+        const isReceiver    = chatId === userId;
+        const isOpenDirect  = selectedChat === typerId;
+        const isCurrentChat = selectedChat === chatId;
+        
+        return (isReceiver && isOpenDirect) || isCurrentChat;
+    }
+
+    const typers: Array<string> = Object.entries(typingStatus)
+        .filter(([_, value]) => value ? checkIsTypingInChat(value.chatId, value.typerId) : false)
+        .map(([username]) => username);
 
     const messageNodes = (
         messages.map((message, ind) => {

@@ -137,7 +137,7 @@ export default function TestSocket() {
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
                     onFocus={(e) => socket.emit('typing', username, chatroom)}
-                    onBlur={(e) => socket.emit('stop-typing', username, chatroom)}
+                    // onBlur={(e) => socket.emit('stop-typing', username, chatroom)}
                     className="bg-white border border-gray-300 rounded p-4 w-128 whitespace-pre-wrap mb-5"
                 />
                 
