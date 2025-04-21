@@ -27,7 +27,7 @@ export default function GlobalLoadingProvider({
 
     return (
         <div className="relative">
-            <div className={`absolute top-0 left-0 h-screen w-full bg-white z-70 flex justify-center items-center ${(isLoading) ? "": "hidden"}`}>
+            <div className={`absolute top-0 left-0 h-[100dvh] w-full bg-white z-70 flex justify-center items-center ${(isLoading) ? "": "hidden"}`}>
                 <CircularProgress />
             </div>
             <GlobalLoadingContext value={contextValue}>

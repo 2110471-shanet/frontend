@@ -85,6 +85,9 @@ export default function SignUpPane({
                     username: username,
                     password: password,
                 });
+                await new Promise((resolve) => {
+                    setTimeout(resolve, 100);
+                });
                 router.push("/chat");
                 await new Promise((resolve) => {
                     setTimeout(resolve, 100);
