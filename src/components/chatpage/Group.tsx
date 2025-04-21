@@ -12,11 +12,13 @@ export default function Group({
     isJoined,
     numUnread,
     onClickHandler,
+    readMessage,
 }: {
     group: GroupType,
     isJoined: boolean,
     numUnread: number,
-    onClickHandler: Function
+    onClickHandler: Function,
+    readMessage: Function
 }) {
     const { 
         chatSelectionState, setChatSelectionState,
@@ -39,6 +41,7 @@ export default function Group({
             setChatSelectionState("loading");
             setIsSelectedDirectChat(false);
             setSelectedChat(group._id.toString()) ;
+            readMessage();
         }
     }
     

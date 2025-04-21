@@ -68,7 +68,7 @@ export default function SignUpPane({
         }
     }
 
-    async function handleSignInButton(e: SyntheticEvent<HTMLButtonElement>) {
+     async function handleSignInButton(e: SyntheticEvent<HTMLButtonElement>) {
         e.stopPropagation();
         e.preventDefault();
         if (username.length <= 0) {

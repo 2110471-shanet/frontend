@@ -86,8 +86,12 @@ export default function ChatSelect({
                     onClickHandler={(e: SyntheticEvent<HTMLDivElement>) => {
                         // setChatSelectionState("loading");
                         setActiveGroupInd(ind);
+                        // socket.emit('read-message', groupInfo._id);
+                    }} 
+                    readMessage={() => {
                         socket.emit('read-message', groupInfo._id);
-                    }} />
+                    }}
+                    />
             );
         })
     );
