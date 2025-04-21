@@ -63,12 +63,12 @@ export default function TextInput() {
     }
 
     function typingHandler() {
-        // console.log(selectedChat);
+        console.log('typing...')
         socket.emit('typing', username, selectedChat);
     }
 
     function stopTypingHandler(e: SyntheticEvent<HTMLTextAreaElement>) {
-        // console.log('stop typing');
+        console.log('stop typing')
         socket.emit('stop-typing', username, selectedChat);
     }
 

@@ -312,13 +312,15 @@ export default function Chat() {
             });
 
             socket.on('others-typing', (username: string, typerId: string, chatId: string) => {
-                const isChatisOpenned = chatId === selectedChat;
-                const isSelfisTyping  = typerId === userId;
+                const isOpennedGroupChat   = selectedChat === chatId;
+                const isOpennedDirectChat  = selectedChat === typerId;
+                const isReceivedDirectChat = chatId === userId;
 
-                if (!isSelfisTyping && !isChatisOpenned) {
+                if (!isOpennedGroupChat && (!isOpennedDirectChat || !isReceivedDirectChat)) {
                     return;
                 }
             
+                console.log('other is typing')
                 if (typingUsers.includes(username)) {
                     return;
                 }
