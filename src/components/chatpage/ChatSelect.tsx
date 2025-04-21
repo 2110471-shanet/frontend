@@ -4,7 +4,7 @@ import CreateGroup from "./CreateGroup";
 import Group from "./Group";
 import LinkGroup from "./LinkGroup";
 import User from "./User";
-import { GroupType, MessageType, UserType, UserWithLastMessageType } from "@/types";
+import { GroupType, MessageType, UserType } from "@/types";
 import { useUser } from "../provider/UserProvider";
 import { useGroup } from "../provider/GroupProvider";
 import { useChatSelectionState } from "@/app/chat/pageContext";

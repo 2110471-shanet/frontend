@@ -10,10 +10,6 @@ type UserType = {
     unreadCount: number,
 }
 
-type UserWithLastMessageType = UserType & {
-    lastMessage?: MessageType,
-};
-
 type UserContextType = {
     username: string;
     userId: string;
@@ -69,9 +65,16 @@ type MessagesContextType = {
     setMessages: React.Dispatch<React.SetStateAction<Array<MessageType>>>;
 };
 
+type TypingStatusType = {
+    [key: string]: {
+        chatId: string,
+        typerId: string,
+    } | null,
+}
+
 export type { 
     GlobalLoadingContextType, UserContextType, MembersType, 
     GroupContextType, ChatSelectionStateContextType, 
     MessageType, MessagesContextType, UserType, GroupType,
-    UserWithLastMessageType,
+    TypingStatusType,
 };
