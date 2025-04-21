@@ -52,7 +52,7 @@ export default function GroupProvider({
                 setGroupName("");
                 setMembers([]);
             }}>
-                <div className="w-96 h-96 shrink-0 bg-white z-60 rounded-lg drop-shadow-md px-6 py-6 flex flex-col items-center" onClick={(e) => {
+                <div className="w-88 h-96 shrink-0 bg-white z-60 rounded-lg drop-shadow-md px-6 py-6 flex flex-col items-center" onClick={(e) => {
                     e.stopPropagation();
                 }}>
                     <span className="py-2 text-2xl truncate max-w-full">{groupName}</span>
