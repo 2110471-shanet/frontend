@@ -88,12 +88,9 @@ export default function SignUpPane({
                 await new Promise((resolve) => {
                     setTimeout(resolve, 100);
                 });
-                router.push("/chat");
-                await new Promise((resolve) => {
-                    setTimeout(resolve, 100);
-                });
                 console.log("huh!?")
                 setIsLocalLoading(false);
+                router.refresh();
             } catch {
                 setErrorMessage("error happened");
                 setIsLocalLoading(false);
