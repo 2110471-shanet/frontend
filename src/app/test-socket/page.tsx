@@ -101,7 +101,7 @@ export default function TestSocket() {
     }, [isLoading, isFirstLoadSucceed]);
 
     return (
-        <div className="min-h-screen flex items-center justify-center gap-6 bg-slate-100 p-6"> 
+        <div className="min-h-[100dvh] flex items-center justify-center gap-6 bg-slate-100 p-6"> 
             <div>
                 <span> All Chatrooms </span>
                 <div className="bg-white border border-gray-300 rounded p-4 w-128 whitespace-pre-wrap mb-10">
@@ -114,7 +114,7 @@ export default function TestSocket() {
                 </div>
             </div>
 
-            <div className="min-h-screen flex flex-col justify-center bg-slate-100 p-6">
+            <div className="min-h-[100dvh] flex flex-col justify-center bg-slate-100 p-6">
                 <span> Username </span>
                 <input
                     type="text"

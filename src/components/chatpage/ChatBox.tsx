@@ -33,12 +33,6 @@ export default function ChatBox({
       }
     }, []);
 
-    useEffect(() => {
-        console.log(currentUsername);
-    }, [chatSelectionState]);
-
-    // const typingUsers = ["Bobby", "Milner"];
-
     if (chatSelectionState === "ready") {
         return (
             <div className="h-full flex-1 flex flex-col relative w-full" ref={containerRef}>

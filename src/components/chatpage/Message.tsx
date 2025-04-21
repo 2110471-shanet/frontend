@@ -30,7 +30,7 @@ export default function Message({
     if (isMe) {
         return (
             <div className="w-full flex justify-end">
-                <div className="py-2 px-4 my-2 bg-blue-300 rounded-md w-fit max-w-4/5 whitespace-pre-wrap">
+                <div className="py-2 px-4 my-2 bg-blue-300 rounded-md w-fit max-w-4/5 whitespace-pre-wrap break-all">
                     {message}
                 </div>
             </div>
@@ -43,7 +43,7 @@ export default function Message({
                 </div>
                 <div className="flex flex-col flex-1 ms-2">
                     <span>{sender}</span>
-                    <div className="max-w-4/5 w-fit py-2 px-4 text-black bg-blue-200 rounded-md whitespace-pre-wrap">
+                    <div className="max-w-4/5 w-fit py-2 px-4 text-black bg-blue-200 rounded-md whitespace-pre-wrap break-all">
                         {message}
                     </div>
                 </div>

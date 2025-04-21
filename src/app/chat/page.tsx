@@ -26,12 +26,6 @@ export default function Chat() {
     const [selectedChat, setSelectedChat] = useState<string>('') ;
     const [isSelectedDirectChat, setIsSelectedDirectChat] = useState<boolean>(false);
 
-    const chatSelectionStateContextValue = useMemo(() => ({
-        chatSelectionState, setChatSelectionState,
-        selectedChat, setSelectedChat,
-        isSelectedDirectChat, setIsSelectedDirectChat,
-    }), [chatSelectionState, selectedChat, isSelectedDirectChat]);
-
     // [{sender, message}]
     const [messages, setMessages] = useState<Array<MessageType>>([]);
     const [users, setUsers] = useState<Array<UserType>>([]) ;
@@ -39,12 +33,19 @@ export default function Chat() {
     const [lastDirectMessages, setLastDirectMessages] = useState<Array<MessageType | null>>([]);
     const [typingUsers, setTypingUsers] = useState<Array<string>>([]);
 
+    // context
     const messagesContextValue = useMemo(() => ({messages, setMessages}), [messages]);
+    const chatSelectionStateContextValue = useMemo(() => ({
+        chatSelectionState, setChatSelectionState,
+        selectedChat, setSelectedChat,
+        isSelectedDirectChat, setIsSelectedDirectChat,
+    }), [chatSelectionState, selectedChat, isSelectedDirectChat]);
+
 
     const { isLoading, setIsLoading } = useGlobalLoading() ;
     const { 
-        username, userId, currentUsername,
-        setUsername, setUserId, setCurrentUsername,
+        username, userId,
+        setUsername, setUserId,
     } = useUser() ;
 
     const isSocketConnectedRef = useRef<boolean>(false);
@@ -124,11 +125,11 @@ export default function Chat() {
         socket.off('receive-direct-message');
         socket.off('receive-message');
         socket.off('direct-message-read');
-        socket.off('user-joined-chatroom');
         socket.off('message-read');
         socket.off('others-typing');
         socket.off('others-stop-typing');
         socket.off('username-changed');
+        socket.off('user-joined-chatroom');
         socket.off('errors');
     }
 
@@ -186,8 +187,10 @@ export default function Chat() {
         }
         
         return () => {
-            socket.off('join-rooms');
+            socket.off('connect');
             socket.off('active');
+            socket.off('join-rooms');
+            socket.off('on-signed-out');
         }
     }, [isSocketConnectedRef, users, groups]);
 
@@ -204,50 +207,11 @@ export default function Chat() {
             });
 
             socket.on('receive-direct-message', (message, sender) => {
-                if (sender._id !== userId) {
-                    playSoundIncomingChat();
-                    if (sender._id !== selectedChat) {
-                        const updatedUsers = users.map(user => {
-                            console.log(user.unreadCount);
-                            return user._id === sender._id ? { 
-                                ...user, 
-                                unreadCount: user.unreadCount + 1,
-                            } : user
-                        });
+                const isSendingToSelf = message.senderId === userId;
+                const isChatIsOpenned = message.senderId === selectedChat || message.receiverId == selectedChat;
 
-                        const updatedLastDirectMessagesInd = users.findIndex(user => user._id === message.senderId)
-
-                        const updatedLastDirectMessages = lastDirectMessages.map((lastDirectMessage, ind) => {
-                            return lastDirectMessage ? (ind === updatedLastDirectMessagesInd ? {
-                                ...lastDirectMessage,
-                                message: message.message,
-                                createdAt: message.createdAt,
-                            } : lastDirectMessage) : null
-                        });
-    
-                        setLastDirectMessages(updatedLastDirectMessages);
-                        setUsers(updatedUsers);
-    
-                        return ;
-                    }
-                }
-            
-                const updatedMessages = [
-                    ...messages, {
-                    message: message.message,
-                    createdAt: message.createdAt,
-                    sender: {
-                        _id: sender._id,
-                        username: sender.username,
-                    },
-                    receiver: {
-                        _id: userId,
-                        username: username,
-                    }
-                }];
-
-                const updatedLastDirectMessagesInd = users.findIndex(user => user._id === message.receiverId)
-
+                const isSenderOrReceiver = (user: UserType) => user._id === message.receiverId || user._id === message.senderId;
+                const updatedLastDirectMessagesInd = users.findIndex(isSenderOrReceiver);
                 const updatedLastDirectMessages = lastDirectMessages.map((lastDirectMessage, ind) => {
                     return lastDirectMessage ? (ind === updatedLastDirectMessagesInd ? {
                         ...lastDirectMessage,
@@ -255,43 +219,91 @@ export default function Chat() {
                         createdAt: message.createdAt,
                     } : lastDirectMessage) : null
                 });
-            
-                setMessages(updatedMessages) ;
+
                 setLastDirectMessages(updatedLastDirectMessages);
+
+                // if not sending to self -> plays sound
+                if (!isSendingToSelf) {
+                    playSoundIncomingChat();
+                } 
+                
+                // if chat is open, it suppose to mark as read
+                if (isChatIsOpenned && !isSendingToSelf) {
+                    socket.emit('read-direct-message', userId, message.senderId);
+                }
+
+                if (isChatIsOpenned) {
+                    // if currently opens that chat -> update messages area
+                    const updatedMessages = [
+                        ...messages, {
+                        message: message.message,
+                        createdAt: message.createdAt,
+                        sender: {
+                            _id: message.senderId,
+                            username: sender.username,
+                        },
+                        receiver: {
+                            _id: userId,
+                            username: username,
+                        }
+                    }];
+                
+                    setMessages(updatedMessages) ;
+                } else if (!isSendingToSelf) {
+                    // but if not currently open and received by others -> update unread count
+                    const updatedUsers = users.map(user => {
+                        return user._id === sender._id ? { 
+                            ...user, 
+                            unreadCount: user.unreadCount + 1,
+                        } : user
+                    });
+
+                    setUsers(updatedUsers);
+                }
             });
 
-            socket.on('receive-message', (message, sender, chatId) => {
-                if (chatId !== sender._id) {
+            socket.on('receive-message', (message, sender) => {
+                const isSendingToSelf = message.senderId === userId;
+                const isChatIsOpenned = message.chatRoomId === selectedChat;
+
+                // if not sending to self -> plays sound
+                if (!isSendingToSelf) {
                     playSoundIncomingChat();
-                    if (chatId !== selectedChat && sender._id !== userId) {
-                        const updatedGroups = groups.map(group =>
-                            group._id === chatId ? { 
-                                ...group, 
-                                unreadCount: group.unreadCount + 1 
-                            } : group
-                        );
-    
-                        setGroups(updatedGroups);
-    
-                        return ;
-                    }
                 }
-            
-                const updatedMessages = [
-                    ...messages, {
-                    message: message.message,
-                    createdAt: message.createdAt,
-                    sender: {
-                        _id: sender._id,
-                        username: sender.username,
-                    },
-                    receiver: {
-                        _id: chatId,
-                        username: '',
-                    }
-                }];
-            
-                setMessages(updatedMessages) ;
+
+                // if chat is open, it suppose to mark as read
+                if (isChatIsOpenned && !isSendingToSelf) {
+                    socket.emit('read-message', message.chatRoomId);
+                }
+
+                if (isChatIsOpenned) {
+                    // if currently opens that chat -> update messages area
+                    const updatedMessages = [
+                        ...messages, {
+                        message: message.message,
+                        createdAt: message.createdAt,
+                        sender: {
+                            _id: message.senderId,
+                            username: sender.username,
+                        },
+                        receiver: {
+                            _id: message.chatRoomId,
+                            username: '',
+                        }
+                    }];
+                
+                    setMessages(updatedMessages) ;
+                } else if (!isSendingToSelf) {
+                    // but if not currently open and received by others -> update unread count
+                    const updatedGroups = groups.map(group =>
+                        group._id === message.chatRoomId ? { 
+                            ...group, 
+                            unreadCount: group.unreadCount + 1 
+                        } : group
+                    );
+
+                    setGroups(updatedGroups);
+                }
             });
 
             socket.on('direct-message-read', (senderId: string) => {
@@ -311,9 +323,6 @@ export default function Chat() {
             });
 
             socket.on('others-typing', (username: string, typerId: string, chatId: string) => {
-                console.log(username);
-                console.log(typerId);
-                console.log(chatId);
                 if ((chatId !== userId|| typerId !== selectedChat) && chatId !== selectedChat) {
                     return ;
                 }
@@ -326,8 +335,6 @@ export default function Chat() {
                     ...typingUsers, 
                     username,
                 ];
-
-                console.log(updatedTypingUsers)
 
                 setTypingUsers(updatedTypingUsers);
             });
@@ -383,6 +390,10 @@ export default function Chat() {
 
                 setGroups(updatedGroups) ;
             });
+
+            socket.on('errors', (message: string) => {
+                console.log(message);
+            });
         }
 
         return () => {
@@ -427,7 +438,7 @@ export default function Chat() {
     }
 
     return (
-        <div className="h-screen flex flex-col flex-nowrap w-full relative">
+        <div className="h-[100dvh] flex flex-col flex-nowrap w-full relative">
             <NavBar setIsChatSelectionShown={setIsChatSelectionShown} isChatSelectionShown={isChatSelectionShown} />
             <main className="w-full flex flex-nowrap relative overflow-hidden flex-1 min-h-[300px]">
                 <MessagesContext value={messagesContextValue}>
@@ -444,7 +455,7 @@ export default function Chat() {
                     </ChatSelectionStateContext>
                 </MessagesContext>
             </main>
-            <div className={`absolute w-full h-full min-h-screen top-0 left-0 bg-black duration-150 lg:duration-0 z-20 lg:hidden ${(isChatSelectionShown) ? "opacity-10": "opacity-0 select-none hidden"}`} onClick={(e) => {
+            <div className={`absolute w-full h-full min-h-[100dvh] top-0 left-0 bg-black duration-150 lg:duration-0 z-20 lg:hidden ${(isChatSelectionShown) ? "opacity-10": "opacity-0 select-none hidden"}`} onClick={(e) => {
                 setIsChatSelectionShown(false);
             }}>
                 
