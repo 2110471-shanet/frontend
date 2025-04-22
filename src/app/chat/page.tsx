@@ -200,7 +200,11 @@ export default function Chat() {
 
     useEffect(() => {
         if (isSocketConnectedRef.current) {
-            socket.on('room-created', (room) => {            
+            socket.on('room-created', (room, user) => {  
+                if (user._id === userId) {
+                    socket.emit('also-join', room._id);
+                } 
+                
                 setGroups(prevGroups => [
                     ...prevGroups, {
                         ...room,
@@ -374,6 +378,10 @@ export default function Chat() {
                         closeOnClick: true
                     });
                     playSoundUserJoin();
+                }
+
+                if (user._id === userId) {
+                    socket.emit('also-join', groupId);
                 }
 
                 setGroups(prevGroups => prevGroups.map(group =>
