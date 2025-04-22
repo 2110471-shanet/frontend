@@ -3,7 +3,7 @@
 import { useChatSelectionState, useMessages } from '@/app/chat/pageContext';
 import { getSocket } from '@/lib/socket';
 import SendRoundedIcon from '@mui/icons-material/SendRounded';
-import { KeyboardEvent, SyntheticEvent, useState } from 'react';
+import { KeyboardEvent, SyntheticEvent, useState, useRef } from 'react';
 import { useUser } from '../provider/UserProvider';
 
 export default function TextInput() {
@@ -12,6 +12,8 @@ export default function TextInput() {
     const { selectedChat, setSelectedChat, isSelectedDirectChat } = useChatSelectionState() ;
     const { messages, setMessages } = useMessages() ;
     const { userId, username } = useUser() ;
+
+    const textAreaRef = useRef<HTMLTextAreaElement>(null);
 
     const socket = getSocket() ;
 
@@ -56,6 +58,9 @@ export default function TextInput() {
                 } else {
                     sendGroupMessage();
                 }
+                if (textAreaRef.current) {
+                    textAreaRef.current.blur()
+                }
         
                 setInputValue('') ;
             }
@@ -75,6 +80,7 @@ export default function TextInput() {
     return (
         <div className="relative ps-6 pe-20 py-4 outline outline-slate-300">
             <textarea 
+                ref={textAreaRef}
                 className="w-full px-4 py-4 min-h-12 max-h-56 rounded-lg outline outline-slate-200 focus:outline-blue-300 duration-100 resize-none" 
                 placeholder="Say something..." 
                 value={inputValue}
